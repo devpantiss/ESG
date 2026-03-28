@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
-export default function Navbar() {
+export default function Navbar({ onNavigate }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -17,6 +17,12 @@ export default function Navbar() {
       top: offsetPosition,
       behavior: "smooth",
     });
+  };
+
+  const navigateTo = (path) => {
+    if (onNavigate) {
+      onNavigate(path);
+    }
   };
 
   useEffect(() => {
@@ -77,7 +83,7 @@ export default function Navbar() {
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
-            onClick={() => scrollToSection("register")}
+            onClick={() => navigateTo("/register")}
           >
             Register
           </li>
@@ -96,14 +102,25 @@ export default function Navbar() {
         </ul>
 
         {/* Desktop Button */}
-        <a
-          href="https://forms.gle/ixsurKeVzWQ1gdYbA"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => navigateTo("/register")}
           className="hidden md:block px-5 py-2 rounded-md text-sm font-medium bg-green-700 text-white hover:bg-green-800 transition"
         >
           Register Now
-        </a>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigateTo("/admin")}
+          className={`hidden md:block rounded-md border px-4 py-2 text-sm font-medium transition ${
+            scrolled
+              ? "border-green-800 text-green-900 hover:bg-green-50"
+              : "border-white/50 text-white hover:bg-white/10"
+          }`}
+        >
+          Admin
+        </button>
 
         {/* Hamburger */}
         <button
@@ -159,7 +176,7 @@ export default function Navbar() {
           <p
             className="cursor-pointer"
             onClick={() => {
-              scrollToSection("register");
+              navigateTo("/register");
               setMobileOpen(false);
             }}
           >
@@ -184,14 +201,27 @@ export default function Navbar() {
             Contact
           </p>
 
-          <a
-            href="https://forms.gle/ixsurKeVzWQ1gdYbA"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => {
+              navigateTo("/register");
+              setMobileOpen(false);
+            }}
             className="block w-full text-center bg-green-700 text-white py-3 rounded-md mt-3"
           >
             Register Now
-          </a>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              navigateTo("/admin");
+              setMobileOpen(false);
+            }}
+            className="block w-full rounded-md border border-green-700 py-3 text-center text-green-800"
+          >
+            Admin
+          </button>
         </div>
       </div>
     </nav>

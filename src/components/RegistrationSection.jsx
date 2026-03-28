@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function RegisterSection() {
+export default function RegisterSection({ onNavigate }) {
   return (
     <section id="register" className="bg-[#ebf7eb] py-28 px-6">
       <div className="max-w-6xl mx-auto">
@@ -55,10 +55,9 @@ export default function RegisterSection() {
           />
         </div>
 
-        {/* Registration Includes */}
         <div className="bg-white border border-gray-200 rounded-2xl p-10 max-w-4xl mx-auto text-center">
           <h3 className="text-2xl font-serif font-semibold text-gray-900 mb-8">
-            Registration Includes
+            Registration Opens in a Dedicated Step Flow
           </h3>
 
           <div className="grid md:grid-cols-2 gap-4 text-gray-600 text-left mb-10">
@@ -70,14 +69,19 @@ export default function RegisterSection() {
             <Benefit>Certificate of participation</Benefit>
           </div>
 
-          <a
-            href="https://forms.gle/ixsurKeVzWQ1gdYbA"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:block px-5 py-2 rounded-md text-sm font-medium bg-green-700 text-white hover:bg-green-800 transition"
+          <p className="mx-auto max-w-2xl text-sm text-gray-600">
+            Start registration on a separate page with a multi-step form. This
+            keeps the homepage focused while giving attendees a cleaner
+            submission experience.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.("/register")}
+            className="mt-8 rounded-xl bg-green-700 px-6 py-3 font-medium text-white transition hover:bg-green-800"
           >
-            Register Now
-          </a>
+            Start Registration
+          </button>
         </div>
       </div>
     </section>

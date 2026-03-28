@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import gsap from "gsap";
 
-export default function ESGHero() {
+const TARGET_DATE = new Date("April 10, 2026 09:00:00").getTime();
 
-  const targetDate = new Date("April 10, 2026 09:00:00").getTime();
+export default function ESGHero({ onNavigate }) {
 
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -24,7 +24,7 @@ export default function ESGHero() {
     const interval = setInterval(() => {
 
       const now = new Date().getTime();
-      const difference = targetDate - now;
+      const difference = TARGET_DATE - now;
 
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
@@ -92,7 +92,11 @@ export default function ESGHero() {
 
         <div className="flex justify-center gap-6 mt-10">
 
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-3 rounded-lg font-semibold transition">
+          <button
+            type="button"
+            onClick={() => onNavigate?.("/register")}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-3 rounded-lg font-semibold transition"
+          >
             Register as Industry Participant
           </button>
 

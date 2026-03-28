@@ -1,18 +1,55 @@
-# React + Vite
+# India ESG Summit SPA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This app now includes a Supabase-backed registration flow with manual QR/bank payment, admin verification, and invoice email sending.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install dependencies:
 
-## React Compiler
+```bash
+npm install
+```
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+2. Copy `.env.example` to `.env` and fill in your Supabase project values.
 
-Note: This will impact Vite dev & build performances.
+3. In the Supabase SQL Editor, run `supabase/schema.sql`.
 
-## Expanding the ESLint configuration
+4. Deploy the Supabase Edge Functions in `supabase/functions` and set these secrets:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RESEND_API_KEY`
+- `INVOICE_FROM_EMAIL`
+- `INVOICE_COMPANY_NAME` (optional)
+- `INVOICE_COMPANY_ADDRESS` (optional)
+- `INVOICE_COMPANY_GSTIN` (optional)
+
+5. Create at least one admin user:
+
+- Create the user in Supabase Authentication using email/password.
+- Insert the same user into `public.admin_users` with the auth user id.
+
+Example:
+
+```sql
+insert into public.admin_users (user_id, email)
+values ('YOUR_AUTH_USER_UUID', 'admin@example.com');
+```
+
+6. Run the app:
+
+```bash
+npm run dev
+```
+
+## Routes
+
+- `/` public landing page with visitor registration form
+- `/admin` admin sign-in and response dashboard
+
+## Notes
+
+- The registration form uploads a payment screenshot to Supabase Storage and inserts a pending registration row.
+- Admins can review the screenshot, mark the payment as verified, and then send the invoice by email.
+- Invoice emailing is handled by the `send-registration-invoice` Supabase Edge Function.
+- Dashboard reads are protected by Supabase Auth plus Row Level Security.
