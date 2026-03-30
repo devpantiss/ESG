@@ -1,3 +1,5 @@
+import { NatureRibbon } from "./ESGVisuals";
+
 const opportunities = [
   "New export access in ESG-sensitive markets such as the EU and North America",
   "Improved competitiveness for Uttar Pradesh MSMEs through lower waste and better resource efficiency",
@@ -61,6 +63,8 @@ export default function ChallengesOpportunities() {
           </div>
         </div>
       </div>
+
+      <NatureRibbon theme="light" />
     </section>
   );
 }

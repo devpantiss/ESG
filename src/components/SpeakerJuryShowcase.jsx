@@ -1,3 +1,5 @@
+import { NatureRibbon } from "./ESGVisuals";
+
 const featuredVoices = [
   {
     role: "Speaker Spotlight",
@@ -69,6 +71,8 @@ export default function SpeakerJuryShowcase() {
           ))}
         </div>
       </div>
+
+      <NatureRibbon theme="light" className="opacity-70" />
     </section>
   );
 }

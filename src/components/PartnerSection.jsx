@@ -1,3 +1,5 @@
+import { NatureRibbon } from "./ESGVisuals";
+
 export default function PartnerSection({ onNavigate }) {
   return (
     <section id="partner" className="esg-section esg-pattern-dark bg-[linear-gradient(180deg,#0f172a_0%,#111827_100%)] px-6 py-24 text-white">
@@ -59,6 +61,8 @@ export default function PartnerSection({ onNavigate }) {
           </button>
         </div>
       </div>
+
+      <NatureRibbon theme="dark" className="opacity-75" />
     </section>
   );
 }

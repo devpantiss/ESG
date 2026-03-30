@@ -1,3 +1,5 @@
+import { ESGPriorityCards, NatureRibbon } from "./ESGVisuals";
+
 export default function AboutSummit() {
   return (
     <section id="about" className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#f7fbf8_0%,#ffffff_100%)] px-6 py-28">
@@ -34,7 +36,11 @@ export default function AboutSummit() {
           <StatCard value="45%" label="of exports influenced by MSME strength" accent="cyan" />
           <StatCard value="110M+" label="jobs tied to industrial resilience" accent="amber" />
         </div>
+
+        <ESGPriorityCards />
       </div>
+
+      <NatureRibbon theme="light" />
     </section>
   );
 }

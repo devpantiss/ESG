@@ -1,3 +1,5 @@
+import { NatureRibbon } from "./ESGVisuals";
+
 export default function ContactSection() {
   return (
     <section id="contact" className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#eef7f0_0%,#ffffff_100%)] px-6 py-28">
@@ -46,6 +48,8 @@ export default function ContactSection() {
           </div>
         </div>
       </div>
+
+      <NatureRibbon theme="light" className="opacity-70" />
     </section>
   );
 }

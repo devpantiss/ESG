@@ -1,3 +1,5 @@
+import { NatureRibbon } from "./ESGVisuals";
+
 export default function RegisterSection({ onNavigate }) {
   return (
     <section id="register" className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#ffffff_0%,#f3faf6_100%)] px-6 py-24">
@@ -70,6 +72,8 @@ export default function RegisterSection({ onNavigate }) {
           </button>
         </div>
       </div>
+
+      <NatureRibbon theme="light" />
     </section>
   );
 }

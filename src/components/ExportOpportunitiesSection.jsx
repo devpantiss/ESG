@@ -1,3 +1,5 @@
+import { NatureRibbon } from "./ESGVisuals";
+
 const exportThemes = [
   {
     title: "Export readiness through compliance",
@@ -73,6 +75,8 @@ export default function ExportOpportunitiesSection() {
           </div>
         </div>
       </div>
+
+      <NatureRibbon theme="dark" className="opacity-80" />
     </section>
   );
 }

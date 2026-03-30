@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { NatureRibbon } from "./ESGVisuals";
 
 const objectives = [
   "Equip MSMEs, exporters, and industry leaders with practical ESG adoption roadmaps.",
@@ -99,6 +100,8 @@ export default function SuccessfulModels() {
           </div>
         </div>
       </div>
+
+      <NatureRibbon theme="dark" className="opacity-80" />
     </section>
   );
 }
