@@ -60,6 +60,35 @@ const COLUMNS = [
   { key: "payment_status", label: "Payment", sortable: true },
 ];
 
+const INVOICE_COMPANY_NAME = "India ESG Summit 2026";
+const INVOICE_COMPANY_ADDRESS = "India ESG Summit 2026\nOfficial Billing Address";
+const INVOICE_NOTE = "This invoice confirms that your uploaded payment has been reviewed and verified by the event administration team.";
+
+const EXPORT_FIELDS = [
+  { key: "full_name", label: "Name", getValue: (r) => r.full_name },
+  { key: "participant_type", label: "Category", getValue: (r) => r.participant_type },
+  { key: "organization", label: "Organization", getValue: (r) => r.organization },
+  { key: "designation", label: "Designation", getValue: (r) => r.designation },
+  { key: "email", label: "Email", getValue: (r) => r.email },
+  { key: "phone", label: "Phone", getValue: (r) => r.phone },
+  { key: "city", label: "City", getValue: (r) => r.city },
+  { key: "submitted", label: "Submitted", getValue: (r) => new Date(r.created_at).toLocaleString() },
+  { key: "gender", label: "Gender", getValue: (r) => r.questionnaire?.gender },
+  { key: "sector", label: "Sector", getValue: (r) => r.questionnaire?.sector },
+  { key: "experience", label: "Experience", getValue: (r) => r.questionnaire?.experience ?? "" },
+  { key: "export_experience", label: "Export Experience", getValue: (r) => r.questionnaire?.exportExperience },
+  { key: "interests", label: "Interests", getValue: (r) => Array.isArray(r.questionnaire?.interests) ? r.questionnaire.interests.join("; ") : "" },
+  { key: "participants", label: "Participants", getValue: (r) => r.questionnaire?.participantsCount },
+  { key: "exhibition", label: "Exhibition", getValue: (r) => r.questionnaire?.exhibitionInterest },
+  { key: "accessibility", label: "Accessibility", getValue: (r) => r.questionnaire?.accessibilitySupport },
+  { key: "reference", label: "Reference", getValue: (r) => r.questionnaire?.reference || "" },
+  { key: "payment_status", label: "Payment Status", getValue: (r) => r.payment_status || "pending" },
+  { key: "payment_amount", label: "Amount", getValue: (r) => r.payment_amount ? `${(r.payment_currency || "INR").toUpperCase()} ${r.payment_amount / 100}` : "" },
+  { key: "verified_at", label: "Verified At", getValue: (r) => r.payment_verified_at ? new Date(r.payment_verified_at).toLocaleString() : "" },
+  { key: "invoice_number", label: "Invoice Number", getValue: (r) => r.invoice_number || "" },
+  { key: "invoice_sent_at", label: "Invoice Sent At", getValue: (r) => r.invoice_sent_at ? new Date(r.invoice_sent_at).toLocaleString() : "" },
+];
+
 /* ─────────────────────────── Utilities ─────────────────────────── */
 
 function getCellValue(row, key) {
@@ -130,31 +159,15 @@ function getProofPathCandidates(proofPath) {
   return Array.from(candidates);
 }
 
-function downloadCSV(data, filename) {
-  if (!data.length) return;
-  const headers = [
-    "Name", "Category", "Organization", "Designation", "Email", "Phone",
-    "City", "Submitted", "Gender", "Sector", "Experience", "Export Experience",
-    "Interests", "Participants", "Exhibition", "Accessibility", "Reference",
-    "Payment Status", "Amount", "Verified At", "Invoice Number", "Invoice Sent At",
-  ];
-  const rows = data.map((r) => {
-    const q = r.questionnaire ?? {};
-    return [
-      r.full_name, r.participant_type, r.organization, r.designation,
-      r.email, r.phone, r.city,
-      new Date(r.created_at).toLocaleString(),
-      q.gender, q.sector, q.experience ?? "", q.exportExperience,
-      Array.isArray(q.interests) ? q.interests.join("; ") : "",
-      q.participantsCount, q.exhibitionInterest, q.accessibilitySupport,
-      q.reference || "",
-      r.payment_status || "pending",
-      r.payment_amount ? `${(r.payment_currency || "INR").toUpperCase()} ${r.payment_amount / 100}` : "",
-      r.payment_verified_at ? new Date(r.payment_verified_at).toLocaleString() : "",
-      r.invoice_number || "",
-      r.invoice_sent_at ? new Date(r.invoice_sent_at).toLocaleString() : "",
-    ].map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",");
-  });
+function downloadCSV(data, filename, fieldKeys = EXPORT_FIELDS.map((field) => field.key)) {
+  if (!data.length || !fieldKeys.length) return;
+  const selectedFields = EXPORT_FIELDS.filter((field) => fieldKeys.includes(field.key));
+  const headers = selectedFields.map((field) => field.label);
+  const rows = data.map((row) =>
+    selectedFields
+      .map((field) => `"${String(field.getValue(row) ?? "").replace(/"/g, '""')}"`)
+      .join(","),
+  );
   const blob = new Blob([headers.join(",") + "\n" + rows.join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -193,8 +206,11 @@ export default function AdminDashboard({ onBackToSite }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [proofUrls, setProofUrls] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
+  const [previewInvoice, setPreviewInvoice] = useState(null);
   const [activeActionId, setActiveActionId] = useState("");
   const [proofErrorPaths, setProofErrorPaths] = useState({});
+  const [exportDialog, setExportDialog] = useState({ open: false, mode: "filtered" });
+  const [selectedExportFields, setSelectedExportFields] = useState(() => EXPORT_FIELDS.map((field) => field.key));
 
   const searchRef = useRef(null);
 
@@ -263,6 +279,7 @@ export default function AdminDashboard({ onBackToSite }) {
     setProofUrls({});
     setProofErrorPaths({});
     setPreviewImage(null);
+    setPreviewInvoice(null);
   };
 
   const getProofUrl = useCallback(async (proofPath) => {
@@ -408,6 +425,11 @@ export default function AdminDashboard({ onBackToSite }) {
     setActiveActionId("");
   }, [fetchRegistrations]);
 
+  const openInvoicePreview = useCallback((registration) => {
+    if (!registration?.invoice_number && !registration?.invoice_sent_at) return;
+    setPreviewInvoice(registration);
+  }, []);
+
   /* ── Filtering / sorting / pagination ── */
   const filteredData = useMemo(() => {
     let result = registrations;
@@ -462,6 +484,36 @@ export default function AdminDashboard({ onBackToSite }) {
   }, {});
 
   const paidCount = registrations.filter((r) => r.payment_status === "verified").length;
+  const exportableSelectedRows = useMemo(
+    () => registrations.filter((registration) => selectedIds.has(registration.id)),
+    [registrations, selectedIds],
+  );
+
+  const openExportDialog = useCallback((mode) => {
+    setExportDialog({ open: true, mode });
+  }, []);
+
+  const closeExportDialog = useCallback(() => {
+    setExportDialog((current) => ({ ...current, open: false }));
+  }, []);
+
+  const toggleExportField = useCallback((fieldKey) => {
+    setSelectedExportFields((current) =>
+      current.includes(fieldKey)
+        ? current.filter((key) => key !== fieldKey)
+        : [...current, fieldKey],
+    );
+  }, []);
+
+  const handleExportConfirm = useCallback(() => {
+    const rowsToExport = exportDialog.mode === "selected" ? exportableSelectedRows : filteredData;
+    const filename = exportDialog.mode === "selected"
+      ? `selected-registrations-${Date.now()}.csv`
+      : `registrations-${Date.now()}.csv`;
+
+    downloadCSV(rowsToExport, filename, selectedExportFields);
+    closeExportDialog();
+  }, [closeExportDialog, exportDialog.mode, exportableSelectedRows, filteredData, selectedExportFields]);
 
   /* ═══════════════════ RENDER ═══════════════════ */
 
@@ -637,6 +689,26 @@ export default function AdminDashboard({ onBackToSite }) {
 
             {/* ── Table Panel ── */}
             <Panel>
+              <div className="admin-table-section">
+                <div>
+                  <p className="admin-table-section__eyebrow">Registered Users</p>
+                  <h2 className="admin-table-section__title">Operator Table</h2>
+                  <p className="admin-table-section__subtitle">
+                    Review registrations, verify payment proof, and manage invoice dispatch without leaving context.
+                  </p>
+                </div>
+                <div className="admin-table-section__meta">
+                  <div className="admin-kpi-chip">
+                    <span className="admin-kpi-chip__label">Visible</span>
+                    <span className="admin-kpi-chip__value">{filteredData.length}</span>
+                  </div>
+                  <div className="admin-kpi-chip">
+                    <span className="admin-kpi-chip__label">Verified</span>
+                    <span className="admin-kpi-chip__value">{paidCount}</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Toolbar */}
               <div className="admin-toolbar">
                 <div className="admin-toolbar__left">
@@ -711,7 +783,7 @@ export default function AdminDashboard({ onBackToSite }) {
                   <button
                     type="button"
                     className="admin-btn admin-btn--outline admin-btn--sm"
-                    onClick={() => downloadCSV(filteredData, `registrations-${Date.now()}.csv`)}
+                    onClick={() => openExportDialog("filtered")}
                     title="Export as CSV"
                   >
                     <Download size={15} /> Export
@@ -728,10 +800,7 @@ export default function AdminDashboard({ onBackToSite }) {
                   <button
                     type="button"
                     className="admin-btn admin-btn--outline admin-btn--sm"
-                    onClick={() => {
-                      const selected = registrations.filter((r) => selectedIds.has(r.id));
-                      downloadCSV(selected, `selected-registrations-${Date.now()}.csv`);
-                    }}
+                    onClick={() => openExportDialog("selected")}
                   >
                     <Download size={14} /> Export Selected
                   </button>
@@ -762,62 +831,78 @@ export default function AdminDashboard({ onBackToSite }) {
                 </div>
               ) : (
                 <>
-                  <div className="admin-table-scroll">
-                    <table className="admin-table">
-                      <thead>
-                        <tr>
-                          <th className="admin-th admin-th--check">
-                            <button type="button" className="admin-check-btn" onClick={toggleSelectAll}>
-                              {allPageSelected ? <CheckSquare size={16} /> : somePageSelected ? <MinusSquare size={16} /> : <Square size={16} />}
-                            </button>
-                          </th>
-                          {COLUMNS.map((col) => (
-                            <th
-                              key={col.key}
-                              className={`admin-th ${col.sortable ? "admin-th--sortable" : ""} ${col.sticky ? "admin-th--sticky" : ""}`}
-                              onClick={() => col.sortable && handleSort(col.key)}
-                            >
-                              <span className="admin-th__inner">
-                                {col.label}
-                                {col.sortable && (
-                                  <span className="admin-th__sort-icon">
-                                    {sortKey === col.key ? (
-                                      sortDir === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} />
-                                    ) : (
-                                      <ArrowUpDown size={13} />
-                                    )}
-                                  </span>
-                                )}
-                              </span>
+                  <div className="admin-table-shell">
+                    <div className="admin-table-shell__top">
+                      <div className="admin-table-shell__legend">
+                        <span className="admin-table-shell__dot" />
+                        Live operator view
+                      </div>
+                      <div className="admin-table-shell__hint">
+                        Expand a row to review proof, verify payment, and send invoices
+                      </div>
+                    </div>
+
+                    <div className="admin-table-scroll">
+                      <table className="admin-table">
+                        <caption className="admin-sr-only">
+                          Registered users table for reviewing submissions, payment screenshots, and invoice status.
+                        </caption>
+                        <thead>
+                          <tr>
+                            <th className="admin-th admin-th--check">
+                              <button type="button" className="admin-check-btn" onClick={toggleSelectAll}>
+                                {allPageSelected ? <CheckSquare size={16} /> : somePageSelected ? <MinusSquare size={16} /> : <Square size={16} />}
+                              </button>
                             </th>
-                          ))}
-                          <th className="admin-th">Details</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pagedData.map((reg, idx) => {
-                          const isExpanded = expandedRow === reg.id;
-                          const isSelected = selectedIds.has(reg.id);
-                          return (
-                            <TableRow
-                              key={reg.id}
-                              reg={reg}
-                              idx={idx}
-                              isExpanded={isExpanded}
-                              isSelected={isSelected}
-                              activeActionId={activeActionId}
-                              onPreviewProof={() => openProofPreview(reg)}
-                              getProofUrl={getProofUrl}
-                              proofError={proofErrorPaths[normalizeProofPath(reg.questionnaire?.paymentProofPath)] || ""}
-                              onVerifyPayment={() => handleVerifyPayment(reg.id)}
-                              onSendInvoice={() => handleSendInvoice(reg.id)}
-                              onExpand={() => setExpandedRow(isExpanded ? null : reg.id)}
-                              onSelect={() => toggleSelect(reg.id)}
-                            />
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                            {COLUMNS.map((col) => (
+                              <th
+                                key={col.key}
+                                className={`admin-th ${col.sortable ? "admin-th--sortable" : ""} ${col.sticky ? "admin-th--sticky" : ""}`}
+                                onClick={() => col.sortable && handleSort(col.key)}
+                              >
+                                <span className="admin-th__inner">
+                                  {col.label}
+                                  {col.sortable && (
+                                    <span className="admin-th__sort-icon">
+                                      {sortKey === col.key ? (
+                                        sortDir === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} />
+                                      ) : (
+                                        <ArrowUpDown size={13} />
+                                      )}
+                                    </span>
+                                  )}
+                                </span>
+                              </th>
+                            ))}
+                            <th className="admin-th">Review</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pagedData.map((reg, idx) => {
+                            const isExpanded = expandedRow === reg.id;
+                            const isSelected = selectedIds.has(reg.id);
+                            return (
+                              <TableRow
+                                key={reg.id}
+                                reg={reg}
+                                idx={idx}
+                                isExpanded={isExpanded}
+                                isSelected={isSelected}
+                                activeActionId={activeActionId}
+                                onPreviewProof={() => openProofPreview(reg)}
+                                getProofUrl={getProofUrl}
+                                proofError={proofErrorPaths[normalizeProofPath(reg.questionnaire?.paymentProofPath)] || ""}
+                                onVerifyPayment={() => handleVerifyPayment(reg.id)}
+                                onSendInvoice={() => handleSendInvoice(reg.id)}
+                                onViewInvoice={() => openInvoicePreview(reg)}
+                                onExpand={() => setExpandedRow(isExpanded ? null : reg.id)}
+                                onSelect={() => toggleSelect(reg.id)}
+                              />
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
 
                   {/* Pagination */}
@@ -893,6 +978,151 @@ export default function AdminDashboard({ onBackToSite }) {
           </div>
         </div>
       )}
+
+      {previewInvoice && (
+        <div className="admin-modal-backdrop" role="presentation" onClick={() => setPreviewInvoice(null)}>
+          <div
+            className="admin-invoice-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="invoice-preview-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="admin-invoice">
+              <div className="admin-invoice__hero">
+                <div>
+                  <p className="admin-table-section__eyebrow">Invoice Preview</p>
+                  <h2 id="invoice-preview-title" className="admin-invoice__company">{INVOICE_COMPANY_NAME}</h2>
+                </div>
+                <div className="admin-invoice__meta">
+                  <span>Invoice No: {previewInvoice.invoice_number || "Not generated"}</span>
+                  <span>Invoice Date: {previewInvoice.invoice_sent_at ? new Date(previewInvoice.invoice_sent_at).toLocaleDateString("en-IN") : "Not sent"}</span>
+                  <span>Payment Status: {(previewInvoice.payment_status || "pending").toUpperCase()}</span>
+                </div>
+              </div>
+
+              <div className="admin-invoice__body">
+                <div className="admin-invoice__section">
+                  <p className="admin-invoice__section-label">Bill From</p>
+                  <p className="admin-invoice__section-value">{INVOICE_COMPANY_ADDRESS}</p>
+                </div>
+                <div className="admin-invoice__section">
+                  <p className="admin-invoice__section-label">Bill To</p>
+                  <p className="admin-invoice__section-value">
+                    {previewInvoice.full_name || "Not provided"}{"\n"}
+                    {previewInvoice.organization || ""}{"\n"}
+                    {previewInvoice.email || ""}{"\n"}
+                    {previewInvoice.phone || ""}{"\n"}
+                    {previewInvoice.city || ""}
+                  </p>
+                </div>
+              </div>
+
+              <div className="admin-invoice__table">
+                <div className="admin-invoice__table-row admin-invoice__table-row--head">
+                  <span>Description</span>
+                  <span>Qty</span>
+                  <span>Rate</span>
+                  <span>Amount</span>
+                </div>
+                <div className="admin-invoice__table-row">
+                  <span>India ESG Summit 2026 Registration Fee</span>
+                  <span>1</span>
+                  <span>{(previewInvoice.payment_currency || "INR").toUpperCase()} {((previewInvoice.payment_amount || 0) / 100).toFixed(2)}</span>
+                  <span>{(previewInvoice.payment_currency || "INR").toUpperCase()} {((previewInvoice.payment_amount || 0) / 100).toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="admin-invoice__total">
+                <span>Total</span>
+                <strong>{(previewInvoice.payment_currency || "INR").toUpperCase()} {((previewInvoice.payment_amount || 0) / 100).toFixed(2)}</strong>
+              </div>
+
+              <p className="admin-invoice__note">{INVOICE_NOTE}</p>
+
+              <div className="admin-export-modal__footer">
+                <span className="admin-toolbar__count">
+                  Sent at {previewInvoice.invoice_sent_at ? new Date(previewInvoice.invoice_sent_at).toLocaleString() : "Not sent"}
+                </span>
+                <button type="button" className="admin-btn admin-btn--ghost" onClick={() => setPreviewInvoice(null)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {exportDialog.open && (
+        <div className="admin-modal-backdrop" role="presentation" onClick={closeExportDialog}>
+          <div
+            className="admin-export-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-export-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="admin-export-modal__header">
+              <div>
+                <p className="admin-table-section__eyebrow">Export Fields</p>
+                <h2 id="admin-export-title" className="admin-export-modal__title">Choose columns to export</h2>
+                <p className="admin-export-modal__subtitle">
+                  Exporting {exportDialog.mode === "selected" ? exportableSelectedRows.length : filteredData.length} row{(exportDialog.mode === "selected" ? exportableSelectedRows.length : filteredData.length) === 1 ? "" : "s"} with the selected fields.
+                </p>
+              </div>
+              <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={closeExportDialog}>
+                Close
+              </button>
+            </div>
+
+            <div className="admin-export-modal__actions">
+              <button
+                type="button"
+                className="admin-btn admin-btn--ghost admin-btn--sm"
+                onClick={() => setSelectedExportFields(EXPORT_FIELDS.map((field) => field.key))}
+              >
+                Select All
+              </button>
+              <button
+                type="button"
+                className="admin-btn admin-btn--ghost admin-btn--sm"
+                onClick={() => setSelectedExportFields([])}
+              >
+                Clear All
+              </button>
+            </div>
+
+            <div className="admin-export-grid">
+              {EXPORT_FIELDS.map((field) => {
+                const isChecked = selectedExportFields.includes(field.key);
+                return (
+                  <label key={field.key} className={`admin-export-field ${isChecked ? "admin-export-field--active" : ""}`}>
+                    <input
+                      type="checkbox"
+                      className="admin-export-field__checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleExportField(field.key)}
+                    />
+                    <span className="admin-export-field__label">{field.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            <div className="admin-export-modal__footer">
+              <span className="admin-toolbar__count">{selectedExportFields.length} fields selected</span>
+              <button
+                type="button"
+                className="admin-btn admin-btn--primary"
+                onClick={handleExportConfirm}
+                disabled={!selectedExportFields.length}
+              >
+                <Download size={15} /> Export CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -932,6 +1162,7 @@ function TableRow({
   proofError,
   onVerifyPayment,
   onSendInvoice,
+  onViewInvoice,
   activeActionId,
 }) {
   const q = reg.questionnaire ?? {};
@@ -939,6 +1170,7 @@ function TableRow({
   const isSendingInvoice = activeActionId === `invoice:${reg.id}`;
   const canSendInvoice = reg.payment_status === "verified";
   const hasProof = Boolean(q.paymentProofPath);
+  const canViewInvoice = Boolean(reg.invoice_number || reg.invoice_sent_at);
   return (
     <>
       <tr className={`admin-row ${idx % 2 === 0 ? "admin-row--even" : ""} ${isSelected ? "admin-row--selected" : ""} ${isExpanded ? "admin-row--expanded" : ""}`}>
@@ -977,7 +1209,7 @@ function TableRow({
           <PaymentBadge status={reg.payment_status} amount={reg.payment_amount} currency={reg.payment_currency} />
         </td>
         <td className="admin-td">
-          <button type="button" className={`admin-expand-btn ${isExpanded ? "admin-expand-btn--active" : ""}`} onClick={onExpand} title="View details">
+          <button type="button" className={`admin-expand-btn ${isExpanded ? "admin-expand-btn--active" : ""}`} onClick={onExpand} title="Review submission">
             <ChevronRightIcon size={16} />
           </button>
         </td>
@@ -986,24 +1218,40 @@ function TableRow({
         <tr className="admin-detail-row">
           <td colSpan={COLUMNS.length + 2}>
             <div className="admin-detail">
+              <div className="admin-detail__summary">
+                <div>
+                  <p className="admin-detail__eyebrow">Submission Review</p>
+                  <h3 className="admin-detail__title">{reg.full_name || "Unnamed participant"}</h3>
+                  <p className="admin-detail__subtitle">
+                    {reg.organization || "Organization not provided"}{reg.designation ? ` • ${reg.designation}` : ""}
+                  </p>
+                </div>
+                <div className="admin-detail__summary-badges">
+                  <CategoryBadge type={reg.participant_type} />
+                  <PaymentBadge status={reg.payment_status} amount={reg.payment_amount} currency={reg.payment_currency} />
+                </div>
+              </div>
+
               <div className="admin-detail__grid">
+                <DetailItem label="Email" value={reg.email} />
+                <DetailItem label="Phone" value={reg.phone} />
+                <DetailItem label="City" value={reg.city} />
+                <DetailItem label="Submitted" value={new Date(reg.created_at).toLocaleString()} />
                 <DetailItem label="Gender" value={q.gender} />
                 <DetailItem label="Sector" value={q.sector} />
                 <DetailItem label="Experience" value={q.experience != null ? `${q.experience} years` : null} />
                 <DetailItem label="Export Experience" value={q.exportExperience} />
-                <DetailItem label="Interests" value={Array.isArray(q.interests) ? q.interests.join(", ") : null} span />
                 <DetailItem label="Participants" value={q.participantsCount} />
                 <DetailItem label="Exhibition Interest" value={q.exhibitionInterest} />
                 <DetailItem label="Accessibility Support" value={q.accessibilitySupport} />
                 <DetailItem label="Reference" value={q.reference} />
                 <DetailItem label="Payment Proof" value={q.paymentProofPath ? "Uploaded" : "Not uploaded"} />
-                <DetailItem label="Proof Path" value={q.paymentProofPath} span />
                 <DetailItem label="Verified At" value={reg.payment_verified_at ? new Date(reg.payment_verified_at).toLocaleString() : null} />
                 <DetailItem label="Invoice Number" value={reg.invoice_number} />
-                <DetailItem
-                  label="Paid At"
-                  value={reg.payment_completed_at ? new Date(reg.payment_completed_at).toLocaleString() : null}
-                />
+                <DetailItem label="Invoice Sent At" value={reg.invoice_sent_at ? new Date(reg.invoice_sent_at).toLocaleString() : null} />
+                <DetailItem label="Paid At" value={reg.payment_completed_at ? new Date(reg.payment_completed_at).toLocaleString() : null} />
+                <DetailItem label="Interests" value={Array.isArray(q.interests) ? q.interests.join(", ") : null} span />
+                <DetailItem label="Proof Path" value={q.paymentProofPath} span />
               </div>
 
               <div className="admin-detail__actions">
@@ -1030,6 +1278,14 @@ function TableRow({
                   disabled={!canSendInvoice || isSendingInvoice}
                 >
                   {isSendingInvoice ? "Sending..." : reg.invoice_sent_at ? "Resend Invoice" : "Send Invoice"}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn--ghost admin-btn--sm"
+                  onClick={onViewInvoice}
+                  disabled={!canViewInvoice}
+                >
+                  View Invoice
                 </button>
               </div>
             </div>
@@ -1264,15 +1520,93 @@ const adminStyles = `
 
 /* ── Panel ── */
 .admin-panel {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%),
+    rgba(20,17,15,0.86);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
   padding: 20px;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 18px 50px rgba(0,0,0,0.22);
   min-width: 0;
   overflow: hidden;
 }
 @media (min-width: 640px) { .admin-panel { padding: 24px; } }
+
+.admin-table-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+.admin-table-section__eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #67e8f9;
+  margin-bottom: 8px;
+}
+.admin-table-section__title {
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 700;
+  line-height: 1.05;
+  color: #fafaf9;
+  letter-spacing: -0.03em;
+}
+.admin-table-section__subtitle {
+  max-width: 640px;
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #8b8681;
+}
+.admin-table-section__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+}
+.admin-kpi-chip {
+  min-width: 104px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.admin-kpi-chip__label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #78716c;
+}
+.admin-kpi-chip__value {
+  display: block;
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: #f5f5f4;
+}
+
+.admin-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ── Text helpers ── */
 .admin-text--muted { font-size: 14px; color: #78716c; }
@@ -1591,10 +1925,14 @@ const adminStyles = `
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)),
+    rgba(12,10,9,0.72);
 }
 .admin-toolbar__left {
   display: flex;
@@ -1610,15 +1948,16 @@ const adminStyles = `
 }
 .admin-toolbar__count {
   font-size: 12px;
-  color: #78716c;
+  color: #a8a29e;
   white-space: nowrap;
+  padding: 0 4px;
 }
 
 /* Search */
 .admin-search {
   position: relative;
   width: 100%;
-  max-width: 300px;
+  max-width: 340px;
 }
 .admin-search__icon {
   position: absolute;
@@ -1630,10 +1969,10 @@ const adminStyles = `
 }
 .admin-search__input {
   width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 8px 34px 8px 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 10px 36px 10px 38px;
   color: #fafaf9;
   font-size: 13px;
   font-family: inherit;
@@ -1666,51 +2005,93 @@ const adminStyles = `
 .admin-filter-pills {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .admin-filter-pills__icon { color: #57534e; flex-shrink: 0; }
 .admin-pill {
   font-family: inherit;
   font-size: 11px;
-  font-weight: 500;
-  padding: 5px 10px;
+  font-weight: 600;
+  padding: 7px 12px;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
   color: #78716c;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
 }
-.admin-pill:hover { border-color: rgba(255,255,255,0.15); color: #a8a29e; }
+.admin-pill:hover {
+  border-color: rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.05);
+  color: #d6d3d1;
+}
 .admin-pill--active {
-  background: rgba(6,182,212,0.1);
-  border-color: rgba(6,182,212,0.3);
+  background: rgba(6,182,212,0.12);
+  border-color: rgba(6,182,212,0.36);
   color: #67e8f9;
+  box-shadow: inset 0 0 0 1px rgba(103,232,249,0.08);
 }
 
 /* ── Bulk bar ── */
 .admin-bulk-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
-  margin-bottom: 12px;
-  border-radius: 10px;
-  background: rgba(6,182,212,0.06);
-  border: 1px solid rgba(6,182,212,0.15);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: rgba(6,182,212,0.07);
+  border: 1px solid rgba(6,182,212,0.18);
 }
 .admin-bulk-bar__text { font-size: 13px; color: #67e8f9; font-weight: 500; }
 
 /* ─────── Table ─────── */
+.admin-table-shell {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
+    rgba(12,10,9,0.8);
+}
+.admin-table-shell__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+}
+.admin-table-shell__legend,
+.admin-table-shell__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8b8681;
+}
+.admin-table-shell__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22d3ee;
+  box-shadow: 0 0 0 4px rgba(34,211,238,0.12);
+}
 .admin-table-scroll {
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.1) transparent;
-  margin: 0 -20px;
-  padding: 0 20px;
+  margin: 0;
+  padding: 0;
 }
 .admin-table-scroll::-webkit-scrollbar { height: 6px; }
 .admin-table-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -1719,8 +2100,8 @@ const adminStyles = `
 
 .admin-table {
   width: 100%;
-  min-width: 1100px;
-  border-collapse: collapse;
+  min-width: 1240px;
+  border-collapse: separate;
   border-spacing: 0;
 }
 
@@ -1729,53 +2110,87 @@ const adminStyles = `
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(28,25,23,0.92);
+  background: rgba(24,21,19,0.96);
   backdrop-filter: blur(12px);
-  padding: 10px 14px;
+  padding: 14px 16px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #57534e;
+  letter-spacing: 0.1em;
+  color: #8b8681;
   text-align: left;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   white-space: nowrap;
   user-select: none;
 }
-.admin-th--check { width: 40px; }
+.admin-th--check {
+  width: 48px;
+  position: sticky;
+  left: 0;
+  z-index: 14;
+}
+.admin-th--sticky {
+  position: sticky;
+  left: 48px;
+  z-index: 13;
+  box-shadow: 1px 0 0 rgba(255,255,255,0.06);
+}
 .admin-th--sortable { cursor: pointer; transition: color 0.15s; }
-.admin-th--sortable:hover { color: #a8a29e; }
+.admin-th--sortable:hover { color: #d6d3d1; }
 .admin-th__inner {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 .admin-th__sort-icon { opacity: 0.4; transition: opacity 0.15s; }
 .admin-th--sortable:hover .admin-th__sort-icon { opacity: 0.8; }
 
 /* Tbody */
 .admin-td {
-  padding: 12px 14px;
+  padding: 14px 16px;
   font-size: 13px;
   color: #d6d3d1;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  vertical-align: top;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  vertical-align: middle;
   white-space: nowrap;
 }
-.admin-td--check { width: 40px; }
-.admin-td--name { min-width: 160px; }
-.admin-td__primary { font-weight: 500; color: #e7e5e4; }
-.admin-td__secondary { font-size: 11px; color: #57534e; margin-top: 2px; }
+.admin-td--check {
+  width: 48px;
+  position: sticky;
+  left: 0;
+  z-index: 8;
+}
+.admin-td--sticky {
+  position: sticky;
+  left: 48px;
+  z-index: 7;
+}
+.admin-td--check,
+.admin-td--sticky {
+  background: #14110f;
+  box-shadow: 1px 0 0 rgba(255,255,255,0.05);
+}
+.admin-td--name { min-width: 190px; }
+.admin-td__primary { font-weight: 600; color: #f5f5f4; line-height: 1.35; }
+.admin-td__secondary { font-size: 11px; color: #78716c; margin-top: 4px; }
 .admin-td__email { color: #a8a29e; }
 
 /* Row states */
-.admin-row { transition: background 0.15s; }
-.admin-row--even { background: rgba(255,255,255,0.015); }
-.admin-row:hover { background: rgba(6,182,212,0.04); }
-.admin-row--selected { background: rgba(6,182,212,0.06) !important; }
-.admin-row--expanded { background: rgba(6,182,212,0.04) !important; }
+.admin-row { transition: background-color 0.15s ease, box-shadow 0.15s ease; }
+.admin-row--even .admin-td { background-color: rgba(255,255,255,0.012); }
+.admin-row:hover .admin-td { background-color: rgba(6,182,212,0.05); }
+.admin-row--selected .admin-td { background-color: rgba(6,182,212,0.085) !important; }
+.admin-row--expanded .admin-td { background-color: rgba(6,182,212,0.06) !important; }
+.admin-row:hover .admin-td--check,
+.admin-row:hover .admin-td--sticky,
+.admin-row--selected .admin-td--check,
+.admin-row--selected .admin-td--sticky,
+.admin-row--expanded .admin-td--check,
+.admin-row--expanded .admin-td--sticky {
+  background-color: #151b1b !important;
+}
 .admin-row:hover .admin-td:first-child {
-  box-shadow: inset 3px 0 0 #06b6d4;
+  box-shadow: inset 3px 0 0 #06b6d4, 1px 0 0 rgba(255,255,255,0.05);
 }
 
 /* Checkbox btn */
@@ -1793,16 +2208,16 @@ const adminStyles = `
 
 /* Expand btn */
 .admin-expand-btn {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.1);
   color: #78716c;
-  width: 28px; height: 28px;
-  border-radius: 8px;
+  width: 32px; height: 32px;
+  border-radius: 10px;
   cursor: pointer;
   display: grid; place-items: center;
   transition: all 0.2s;
 }
-.admin-expand-btn:hover { background: rgba(255,255,255,0.08); color: #e7e5e4; }
+.admin-expand-btn:hover { background: rgba(255,255,255,0.08); color: #f5f5f4; }
 .admin-expand-btn--active {
   background: rgba(6,182,212,0.1);
   border-color: rgba(6,182,212,0.3);
@@ -1815,10 +2230,48 @@ const adminStyles = `
   padding: 0;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
+.admin-detail__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.admin-detail__eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #67e8f9;
+  margin-bottom: 8px;
+}
+.admin-detail__title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #fafaf9;
+}
+.admin-detail__subtitle {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #8b8681;
+}
+.admin-detail__summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
 .admin-detail {
-  padding: 16px 20px 20px;
-  background: rgba(6,182,212,0.02);
-  border-top: 1px solid rgba(6,182,212,0.08);
+  padding: 18px 20px 20px;
+  background:
+    linear-gradient(180deg, rgba(6,182,212,0.05), rgba(6,182,212,0.015)),
+    rgba(10,14,15,0.92);
   animation: admin-slide-down 0.25s ease;
 }
 @keyframes admin-slide-down {
@@ -1827,16 +2280,22 @@ const adminStyles = `
 }
 .admin-detail__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
 }
 .admin-detail__actions {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
-.admin-detail__item {}
+.admin-detail__item {
+  min-height: 72px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.025);
+}
 .admin-detail__item--span { grid-column: 1 / -1; }
 .admin-detail__label {
   font-size: 10px;
@@ -1844,11 +2303,12 @@ const adminStyles = `
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #57534e;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
 }
 .admin-detail__value {
   font-size: 13px;
-  color: #d6d3d1;
+  color: #e7e5e4;
+  line-height: 1.5;
   word-break: break-all;
 }
 
@@ -1881,20 +2341,23 @@ const adminStyles = `
 .admin-badge--stone { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #a8a29e; }
 
 .admin-proof-thumb {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+    rgba(255,255,255,0.03);
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 .admin-proof-thumb:hover {
   border-color: rgba(6,182,212,0.45);
   transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
 }
 .admin-proof-thumb__image {
   width: 100%;
@@ -1907,6 +2370,50 @@ const adminStyles = `
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #d6d3d1;
+}
+.admin-btn:focus-visible,
+.admin-pill:focus-visible,
+.admin-search__input:focus-visible,
+.admin-page-btn:focus-visible,
+.admin-check-btn:focus-visible,
+.admin-expand-btn:focus-visible,
+.admin-proof-thumb:focus-visible,
+.admin-pagination__select:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .admin-table-section__meta {
+    width: 100%;
+  }
+  .admin-kpi-chip {
+    flex: 1 1 140px;
+  }
+  .admin-toolbar {
+    padding: 12px;
+  }
+  .admin-toolbar__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .admin-detail {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .admin-detail__summary {
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+  }
+  .admin-invoice {
+    padding: 16px;
+  }
+  .admin-invoice__table-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-invoice__meta {
+    text-align: left;
+  }
 }
 
 /* ─────── Pagination ─────── */
@@ -1963,6 +2470,213 @@ const adminStyles = `
 .admin-page-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+/* ─────── Invoice modal ─────── */
+.admin-invoice-modal {
+  width: min(960px, 100%);
+  max-height: min(90vh, 920px);
+  overflow: auto;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(20,17,15,0.98);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.36);
+}
+.admin-invoice {
+  padding: 24px;
+}
+.admin-invoice__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(8,145,178,0.18), rgba(8,145,178,0.06));
+}
+.admin-invoice__company {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: #fafaf9;
+}
+.admin-invoice__meta {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: #d6d3d1;
+  text-align: right;
+}
+.admin-invoice__body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.admin-invoice__section {
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+}
+.admin-invoice__section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #78716c;
+  margin-bottom: 8px;
+}
+.admin-invoice__section-value {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #f5f5f4;
+  white-space: pre-line;
+}
+.admin-invoice__table {
+  margin-top: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.admin-invoice__table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) 80px 140px 140px;
+  gap: 12px;
+  padding: 16px 18px;
+  font-size: 13px;
+  color: #f5f5f4;
+  background: rgba(255,255,255,0.015);
+}
+.admin-invoice__table-row + .admin-invoice__table-row {
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.admin-invoice__table-row--head {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8b8681;
+  background: rgba(255,255,255,0.04);
+}
+.admin-invoice__total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #d6d3d1;
+}
+.admin-invoice__total strong {
+  font-size: 22px;
+  color: #fafaf9;
+}
+.admin-invoice__note {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  font-size: 13px;
+  line-height: 1.65;
+  color: #cfcac6;
+}
+
+/* ─────── Export modal ─────── */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(8px);
+}
+.admin-export-modal {
+  width: min(760px, 100%);
+  max-height: min(86vh, 820px);
+  overflow: auto;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)),
+    rgba(20,17,15,0.96);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.36);
+}
+.admin-export-modal__header,
+.admin-export-modal__actions,
+.admin-export-modal__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+}
+.admin-export-modal__header {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.admin-export-modal__actions {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.admin-export-modal__footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.admin-export-modal__title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: #fafaf9;
+  letter-spacing: -0.03em;
+}
+.admin-export-modal__subtitle {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #8b8681;
+}
+.admin-export-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 0 20px 20px;
+}
+.admin-export-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+.admin-export-field:hover {
+  border-color: rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.04);
+}
+.admin-export-field--active {
+  border-color: rgba(6,182,212,0.34);
+  background: rgba(6,182,212,0.08);
+}
+.admin-export-field__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #06b6d4;
+  flex-shrink: 0;
+}
+.admin-export-field__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5f5f4;
 }
 
 /* ─────── Skeleton ─────── */

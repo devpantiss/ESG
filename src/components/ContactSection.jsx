@@ -1,59 +1,51 @@
-import React from "react";
-
 export default function ContactSection() {
   return (
-    <section id="contact" className="bg-[#ebf7eb] py-28 px-6">
+    <section id="contact" className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#eef7f0_0%,#ffffff_100%)] px-6 py-28">
+      <div className="esg-section-band" />
+      <div className="esg-orb esg-orb--emerald left-[-2rem] top-16 h-40 w-40" />
+      <div className="esg-orb esg-orb--cyan right-[-2rem] bottom-10 h-44 w-44" />
 
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="esg-shell">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="esg-badge bg-emerald-100/80 text-emerald-800">Contact Us</div>
+          <h2 className="mt-6 text-4xl font-semibold tracking-tight text-stone-900 md:text-5xl">
+            Reach the organizing secretariat
+          </h2>
 
-        {/* Heading */}
-        <h2 className="text-4xl md:text-5xl font-serif font-semibold text-green-900 mb-12">
-          Contact <span className="text-green-700">Us</span>
-        </h2>
+          <div className="esg-card-light mx-auto mt-12 max-w-xl rounded-[2rem] p-10">
+            <h3 className="text-2xl font-semibold text-stone-900">
+              Organizing Secretariat
+            </h3>
 
-        {/* Card */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-10 shadow-sm max-w-xl mx-auto">
+            <p className="mt-2 font-semibold text-emerald-700">
+              India ESG Alliance
+            </p>
 
-          <h3 className="text-xl font-serif font-semibold text-gray-900">
-            Organizing Secretariat
-          </h3>
+            <div className="esg-divider mt-8" />
 
-          <p className="text-green-700 font-semibold mt-2">
-            India ESG Alliance
-          </p>
+            <div className="mt-8 space-y-5 text-stone-700">
+              <div className="flex items-center justify-center gap-2">
+                <span>👤</span>
+                <span className="font-medium">Dr. Sanjaya Pradhan</span>
+              </div>
 
-          {/* Person */}
-          <div className="flex items-center justify-center gap-2 mt-6 text-gray-800">
+              <p className="text-sm text-stone-500">
+                Director, India ESG Alliance
+              </p>
 
-            <span>👤</span>
-            <span className="font-medium">Dr. Sanjaya Pradhan</span>
+              <div className="flex items-center justify-center gap-2">
+                <span>✉️</span>
+                <span>indiaesgalliance@gmail.com</span>
+              </div>
 
+              <div className="flex items-center justify-center gap-2">
+                <span>📞</span>
+                <span>+91 8976020243</span>
+              </div>
+            </div>
           </div>
-
-          <p className="text-gray-500 text-sm mt-1">
-            Director, India ESG Alliance
-          </p>
-
-          {/* Email */}
-          <div className="flex items-center justify-center gap-2 mt-6 text-gray-700">
-
-            <span>✉️</span>
-            <span>indiaesgalliance@gmail.com</span>
-
-          </div>
-
-          {/* Phone */}
-          <div className="flex items-center justify-center gap-2 mt-4 text-gray-700">
-
-            <span>📞</span>
-            <span>+91 8976020243</span>
-
-          </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }

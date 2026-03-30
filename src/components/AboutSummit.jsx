@@ -1,79 +1,58 @@
-import React from "react";
-
 export default function AboutSummit() {
   return (
-    <section id="about" className="bg-white py-28 px-6">
+    <section id="about" className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#f7fbf8_0%,#ffffff_100%)] px-6 py-28">
+      <div className="esg-section-glow" />
+      <div className="esg-section-band" />
+      <div className="esg-orb esg-orb--emerald left-[-4rem] top-16 h-48 w-48" />
+      <div className="esg-orb esg-orb--cyan right-[-3rem] top-20 h-40 w-40" />
 
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="esg-shell">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="esg-badge bg-emerald-100/80 text-emerald-800">
+            <span>About the Summit</span>
+          </div>
 
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm mb-6">
+          <h2 className="mt-6 text-4xl font-semibold tracking-tight text-stone-900 md:text-5xl">
+            Preparing India for a <span className="text-emerald-700">more credible ESG future</span>
+          </h2>
 
-          <span>🍃</span>
-          <span>About the Summit</span>
+          <p className="mt-6 text-base leading-8 text-stone-600">
+            India's ESG landscape is moving from voluntary signaling to operational necessity. Regulations,
+            investor expectations, and global supply-chain pressure now require businesses to demonstrate stronger
+            environmental discipline, social responsibility, and governance clarity.
+          </p>
 
+          <p className="mt-5 text-base leading-8 text-stone-600">
+            <span className="font-semibold text-stone-800">India ESG Summit 2026</span> is built to help Indian
+            industries, especially MSMEs, convert those demands into export competitiveness, institutional trust,
+            and long-term industrial growth.
+          </p>
         </div>
 
-        {/* Heading */}
-        <h2 className="text-4xl md:text-5xl font-serif font-semibold text-green-900 mb-6">
-          Preparing India for a <span className="text-green-700">Sustainable Future</span>
-        </h2>
-
-        {/* Paragraph 1 */}
-        <p className="text-gray-600 leading-relaxed mb-6">
-          India's Environmental, Social, and Governance (ESG) landscape is undergoing a
-          transformative shift from voluntary initiatives to strategic business
-          imperatives. Regulatory frameworks such as SEBI's BRSR and BRSR Core,
-          rising investor expectations, and global supply-chain requirements now
-          make ESG compliance essential for market access and competitiveness.
-        </p>
-
-        {/* Paragraph 2 */}
-        <p className="text-gray-600 leading-relaxed">
-          The <span className="font-semibold text-gray-800">India ESG Summit 2026</span>
-          aims to prepare Indian industries — particularly MSMEs — to align with
-          global ESG standards, unlock export potential, and position India as a
-          trusted sustainable manufacturing hub.
-        </p>
-
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
+          <StatCard value="30%" label="of India's GDP linked to MSMEs" accent="emerald" />
+          <StatCard value="45%" label="of exports influenced by MSME strength" accent="cyan" />
+          <StatCard value="110M+" label="jobs tied to industrial resilience" accent="amber" />
+        </div>
       </div>
-
-      {/* Stats */}
-      <div className="max-w-5xl mx-auto mt-16 grid md:grid-cols-3 gap-6">
-
-        <StatCard
-          value="30%"
-          label="of India's GDP from MSMEs"
-        />
-
-        <StatCard
-          value="45%"
-          label="of total exports"
-        />
-
-        <StatCard
-          value="110M+"
-          label="Jobs supported"
-        />
-
-      </div>
-
     </section>
   );
 }
 
-function StatCard({ value, label }) {
+function StatCard({ value, label, accent }) {
+  const accentMap = {
+    emerald: "bg-emerald-500/10 text-emerald-700",
+    cyan: "bg-cyan-500/10 text-cyan-700",
+    amber: "bg-amber-500/10 text-amber-700",
+  };
+
   return (
-    <div className="bg-white border border-green-100 rounded-xl p-8 text-center shadow-sm hover:shadow-md transition">
-
-      <h3 className="text-3xl font-serif font-semibold text-green-900 mb-2">
-        {value}
-      </h3>
-
-      <p className="text-gray-500 text-sm">
-        {label}
-      </p>
-
-    </div>
+    <article className="esg-card-light rounded-[1.75rem] p-8 text-center transition duration-300 hover:-translate-y-1">
+      <div className={`mx-auto inline-flex rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] ${accentMap[accent]}`}>
+        Summit signal
+      </div>
+      <h3 className="mt-5 text-4xl font-semibold tracking-tight text-stone-900">{value}</h3>
+      <p className="mt-3 text-sm leading-7 text-stone-600">{label}</p>
+    </article>
   );
 }

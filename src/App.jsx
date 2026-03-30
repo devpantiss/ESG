@@ -3,6 +3,7 @@ import Lenis from "lenis";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import AboutSummit from "./components/AboutSummit";
+import ExportOpportunitiesSection from "./components/ExportOpportunitiesSection";
 import ChallengesOpportunities from "./components/ChallengesOpportunities";
 import SuccessfulModels from "./components/SuccessfulModels";
 import RegisterSection from "./components/RegistrationSection";
@@ -11,6 +12,8 @@ import PartnerSection from "./components/PartnerSection";
 import ESGFooter from "./components/Footer";
 import AdminDashboard from "./components/AdminDashboard";
 import RegistrationPage from "./components/RegistrationPage";
+import PartnerPage from "./components/PartnerPage";
+import SpeakerJuryShowcase from "./components/SpeakerJuryShowcase";
 
 export default function App() {
   const [pathname, setPathname] = useState(window.location.pathname);
@@ -62,15 +65,21 @@ export default function App() {
     return <RegistrationPage onBackToSite={() => navigate("/")} />;
   }
 
+  if (pathname === "/partners") {
+    return <PartnerPage onBackToSite={() => navigate("/")} />;
+  }
+
   return (
     <div className="bg-black text-white overflow-x-hidden">
       <Navbar onNavigate={navigate} />
       <Hero onNavigate={navigate} />
       <AboutSummit />
+      <ExportOpportunitiesSection />
       <ChallengesOpportunities />
       <SuccessfulModels />
       <RegisterSection onNavigate={navigate} />
-      <PartnerSection />
+      <PartnerSection onNavigate={navigate} />
+      <SpeakerJuryShowcase />
       <ContactSection />
       <ESGFooter />
     </div>

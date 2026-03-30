@@ -1,155 +1,104 @@
-import React from "react";
+import { useState } from "react";
+
+const objectives = [
+  "Equip MSMEs, exporters, and industry leaders with practical ESG adoption roadmaps.",
+  "Connect policy, finance, and implementation stakeholders in one operator-focused forum.",
+  "Enable export readiness through stronger environment, social, and governance practices.",
+  "Create a platform for Uttar Pradesh to showcase scalable ESG-linked industrial growth.",
+];
+
+const successStories = [
+  {
+    title: "Leather cluster wastewater reduction",
+    subtitle: "Kanpur MSME consortium",
+    text: "Shared treatment upgrades and process discipline helped smaller units cut waste-handling costs and improve buyer trust.",
+  },
+  {
+    title: "Energy-efficient loom modernisation",
+    subtitle: "Textile MSME cluster",
+    text: "Replacing legacy equipment reduced energy intensity, improved margins, and strengthened access to institutional buyers.",
+  },
+  {
+    title: "Formal governance for family-led manufacturing",
+    subtitle: "Engineering MSME case",
+    text: "Basic board discipline, reporting controls, and vendor audits helped the business become more bankable and scale-ready.",
+  },
+];
 
 export default function SuccessfulModels() {
+  const [openStory, setOpenStory] = useState(0);
+
   return (
-    <section id="objectives" className="bg-white py-28 px-6">
+    <section id="objectives" className="esg-section esg-pattern-dark bg-[linear-gradient(180deg,#0c0a09_0%,#111827_100%)] px-6 py-24 text-white">
+      <div className="esg-orb esg-orb--cyan right-[-2rem] top-16 h-44 w-44" />
+      <div className="esg-orb esg-orb--amber left-[-3rem] bottom-12 h-52 w-52" />
 
-      <div className="max-w-6xl mx-auto">
-
-        {/* Top Badge */}
-        <div className="text-center mb-16">
-
-          <div className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full text-sm mb-6">
-            ⭐ Proven Success
+      <div className="esg-shell">
+        <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr]">
+          <div>
+            <div className="esg-badge bg-amber-400/10 text-amber-300">Summit Objectives</div>
+            <h2 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
+              What the summit is designed to deliver.
+            </h2>
+            <div className="mt-8 space-y-4">
+              {objectives.map((objective, index) => (
+                <div
+                  key={objective}
+                  className="esg-card-dark rounded-[1.5rem] px-6 py-5 transition duration-300 hover:-translate-y-1"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                    Objective {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-stone-200">{objective}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-serif font-semibold text-green-900">
-            Successful ESG Models
-          </h2>
+          <div>
+            <div className="esg-badge bg-cyan-400/10 text-cyan-300">Successful Stories</div>
+            <h3 className="mt-6 text-3xl font-semibold tracking-tight text-white">
+              MSME ESG stories and the benefits they unlocked.
+            </h3>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-400">
+              Replacing large corporate case studies, this section focuses on practical MSME outcomes:
+              cost savings, export confidence, buyer credibility, and better access to finance.
+            </p>
 
-          <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-            Learn from India's most impactful ESG leaders and Uttar Pradesh's
-            pioneering sustainability initiatives.
-          </p>
+            <div className="mt-8 space-y-4">
+              {successStories.map((story, index) => {
+                const isOpen = openStory === index;
+                return (
+                  <article
+                    key={story.title}
+                    className="esg-card-dark overflow-hidden rounded-[1.5rem] transition duration-300"
+                  >
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                      onClick={() => setOpenStory(isOpen ? -1 : index)}
+                    >
+                      <div>
+                        <p className="text-lg font-semibold text-white">{story.title}</p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-amber-300">
+                          {story.subtitle}
+                        </p>
+                      </div>
+                      <span className="text-2xl text-stone-400">{isOpen ? "−" : "+"}</span>
+                    </button>
 
+                    {isOpen && (
+                      <div className="border-t border-white/10 px-6 py-5 text-sm leading-7 text-stone-300">
+                        {story.text}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
         </div>
-
-        {/* INDIA ESG CHAMPIONS */}
-        <SectionTitle title="India’s ESG Champions" color="yellow" />
-
-        <div className="grid md:grid-cols-2 gap-6 mb-20">
-
-          <ModelCard
-            icon="🌿"
-            title="Tata Group"
-            subtitle="Integrated ESG Leadership"
-            text="Pioneer in sustainable business with carbon neutrality targets, community development across 800+ villages, and transparent governance rated among Asia's best."
-          />
-
-          <ModelCard
-            icon="☀️"
-            title="Adani Green Energy"
-            subtitle="Renewable Energy Scale"
-            text="World's largest solar power developer with 20+ GW operational capacity, driving India's clean energy transition and green job creation."
-          />
-
-          <ModelCard
-            icon="♻️"
-            title="ITC Limited"
-            subtitle="Circular Economy"
-            text="Carbon positive for 18+ years, water positive for 20+ years, and solid waste recycling positive — a global benchmark in sustainability."
-          />
-
-          <ModelCard
-            icon="🏭"
-            title="Mahindra & Mahindra"
-            subtitle="Carbon Neutral Manufacturing"
-            text="First Indian company to commit to Science Based Targets, with internal carbon pricing and 100% renewable energy across key plants."
-          />
-
-        </div>
-
-        {/* UP HIGHLIGHTS */}
-        <SectionTitle title="Uttar Pradesh Highlights" color="green" />
-
-        <div className="grid md:grid-cols-2 gap-6">
-
-          <ModelCard
-            icon="⚡"
-            title="UP Solar Energy Policy"
-            subtitle="State-led Green Transition"
-            text="UP's ambitious 22 GW solar target is transforming Bundelkhand and Vindhya regions into renewable energy corridors, attracting ₹1 lakh crore investment."
-          />
-
-          <ModelCard
-            icon="📦"
-            title="One District One Product (ODOP)"
-            subtitle="Sustainable MSME Clusters"
-            text="UP's flagship ODOP scheme integrates sustainable production practices across 75 districts, boosting artisan livelihoods and eco-friendly manufacturing."
-          />
-
-          <ModelCard
-            icon="💧"
-            title="Namami Gange in UP"
-            subtitle="River Rejuvenation & ESG"
-            text="Massive industrial effluent treatment in Kanpur's tannery cluster — India's largest ESG-driven industrial pollution remediation initiative."
-          />
-
-          <ModelCard
-            icon="🏙"
-            title="Lucknow Smart City Mission"
-            subtitle="Urban Sustainability"
-            text="Integrated waste management, EV adoption, and green building mandates making Lucknow a model for sustainable urban governance in India."
-          />
-
-        </div>
-
       </div>
-
     </section>
-  );
-}
-
-
-
-function SectionTitle({ title, color }) {
-
-  const lineColor =
-    color === "yellow" ? "bg-yellow-500" : "bg-green-700";
-
-  return (
-    <div className="flex items-center gap-4 mb-8">
-
-      <div className={`w-10 h-[2px] ${lineColor}`}></div>
-
-      <h3 className="text-2xl font-serif font-semibold text-gray-900">
-        {title}
-      </h3>
-
-    </div>
-  );
-}
-
-
-
-function ModelCard({ icon, title, subtitle, text }) {
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
-
-      <div className="flex items-start gap-4">
-
-        <div className="bg-green-100 text-green-700 w-10 h-10 flex items-center justify-center rounded-lg text-lg">
-          {icon}
-        </div>
-
-        <div>
-
-          <h4 className="text-lg font-serif font-semibold text-gray-900">
-            {title}
-          </h4>
-
-          <p className="text-xs text-yellow-600 uppercase tracking-wide mb-2">
-            {subtitle}
-          </p>
-
-          <p className="text-gray-600 text-sm leading-relaxed">
-            {text}
-          </p>
-
-        </div>
-
-      </div>
-
-    </div>
   );
 }

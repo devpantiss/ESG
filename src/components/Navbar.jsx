@@ -71,21 +71,21 @@ export default function Navbar({ onNavigate }) {
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
+            onClick={() => scrollToSection("export")}
+          >
+            Export
+          </li>
+          <li
+            className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("challenges")}
           >
-            Challenges
+            Opportunity
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("objectives")}
           >
             Objectives
-          </li>
-          <li
-            className="cursor-pointer hover:text-yellow-500 transition"
-            onClick={() => navigateTo("/register")}
-          >
-            Register
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
@@ -158,11 +158,20 @@ export default function Navbar({ onNavigate }) {
           <p
             className="cursor-pointer"
             onClick={() => {
+              scrollToSection("export");
+              setMobileOpen(false);
+            }}
+          >
+            Export
+          </p>
+          <p
+            className="cursor-pointer"
+            onClick={() => {
               scrollToSection("challenges");
               setMobileOpen(false);
             }}
           >
-            Challenges
+            Opportunity
           </p>
           <p
             className="cursor-pointer"
@@ -172,15 +181,6 @@ export default function Navbar({ onNavigate }) {
             }}
           >
             Objectives
-          </p>
-          <p
-            className="cursor-pointer"
-            onClick={() => {
-              navigateTo("/register");
-              setMobileOpen(false);
-            }}
-          >
-            Register
           </p>
           <p
             className="cursor-pointer"

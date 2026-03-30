@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
+import nodemailer from "npm:nodemailer@6.9.16";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -195,7 +196,8 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    const gmailUser = Deno.env.get("GMAIL_USER");
+    const gmailAppPassword = Deno.env.get("GMAIL_APP_PASSWORD");
     const invoiceFromEmail = Deno.env.get("INVOICE_FROM_EMAIL");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -203,7 +205,7 @@ Deno.serve(async (request) => {
     const companyAddress = Deno.env.get("INVOICE_COMPANY_ADDRESS") ?? "India ESG Summit 2026\nOfficial Billing Address";
     const companyGstin = Deno.env.get("INVOICE_COMPANY_GSTIN") ?? "";
 
-    if (!resendApiKey || !invoiceFromEmail || !supabaseUrl || !supabaseServiceRoleKey) {
+    if (!gmailUser || !gmailAppPassword || !invoiceFromEmail || !supabaseUrl || !supabaseServiceRoleKey) {
       return json({ error: "Missing invoice email or Supabase function secrets." }, 500);
     }
 
@@ -242,41 +244,37 @@ Deno.serve(async (request) => {
       registration,
     });
 
-    const attachment = btoa(String.fromCharCode(...pdfBytes));
-
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: gmailUser,
+        pass: gmailAppPassword,
       },
-      body: JSON.stringify({
-        from: invoiceFromEmail,
-        to: [registration.email],
-        subject: `Invoice ${invoiceNumber} - India ESG Summit 2026`,
-        html: `
-          <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
-            <h2 style="margin-bottom:8px">India ESG Summit 2026</h2>
-            <p>Your payment has been verified. Please find your invoice attached.</p>
-            <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
-            <p><strong>Participant:</strong> ${registration.full_name}</p>
-            <p><strong>Organization:</strong> ${registration.organization}</p>
-          </div>
-        `,
-        attachments: [
-          {
-            filename: `${invoiceNumber}.pdf`,
-            content: attachment,
-          },
-        ],
-      }),
     });
 
-    const emailData = await emailResponse.json();
-
-    if (!emailResponse.ok) {
-      return json({ error: emailData?.message || "Invoice email could not be sent." }, 500);
-    }
+    await transporter.sendMail({
+      from: invoiceFromEmail,
+      to: registration.email,
+      subject: `Invoice ${invoiceNumber} - India ESG Summit 2026`,
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+          <h2 style="margin-bottom:8px">India ESG Summit 2026</h2>
+          <p>Your payment has been verified. Please find your invoice attached.</p>
+          <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
+          <p><strong>Participant:</strong> ${registration.full_name}</p>
+          <p><strong>Organization:</strong> ${registration.organization}</p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `${invoiceNumber}.pdf`,
+          content: pdfBytes,
+          contentType: "application/pdf",
+        },
+      ],
+    });
 
     const { error: updateError } = await supabase
       .from("registrations")
