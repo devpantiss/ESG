@@ -37,7 +37,7 @@ export default function ContactSection() {
 
               <div className="flex items-center justify-center gap-2">
                 <span>✉️</span>
-                <span>indiaesgalliance@gmail.com</span>
+                <span>info@indiaesgsummit.com</span>
               </div>
 
               <div className="flex items-center justify-center gap-2">

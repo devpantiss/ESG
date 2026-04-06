@@ -59,15 +59,35 @@ export default function ESGHero({ onNavigate }) {
     >
       <div className="absolute inset-0">
         <div className="sticky top-0 h-full overflow-hidden">
-          <video
+          <div
             ref={videoLayerRef}
-            className="h-full w-full object-cover will-change-transform"
-            src="/esg.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
+            className="flex h-full w-full will-change-transform"
+          >
+            <video
+              className="h-full w-1/3 object-cover"
+              src="/e.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+            <video
+              className="h-full w-1/3 object-cover"
+              src="/s.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+            <video
+              className="h-full w-1/3 object-cover"
+              src="/g.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+          </div>
           <div className="absolute inset-0 bg-black/35" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/80" />
         </div>

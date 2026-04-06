@@ -37,7 +37,7 @@ export function ESGPriorityCards() {
       <div className="mb-8 flex items-center justify-center gap-4">
         <div className="h-px w-10 bg-stone-300" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-stone-500">
-          Our ESG Priorities
+          Understanding ESG
         </p>
         <div className="h-px w-10 bg-stone-300" />
       </div>
