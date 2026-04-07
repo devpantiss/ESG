@@ -27,7 +27,35 @@ const featuredVoices = [
   },
 ];
 
-export default function SpeakerJuryShowcase() {
+export default function SpeakerJuryShowcase({ language = "en" }) {
+  const isHindi = language === "hi";
+  const voices = isHindi
+    ? featuredVoices.map((voice, index) => {
+        const map = [
+          {
+            role: "स्पीकर स्पॉटलाइट",
+            name: "नीति और निर्यात नेतृत्व",
+            intro: "ऐसे नीति विशेषज्ञ जो निर्यात-तैयार ESG मार्ग तैयार कर रहे हैं।",
+          },
+          {
+            role: "उद्योग वक्ता",
+            name: "MSME परिवर्तन निर्माता",
+            intro: "वे ऑपरेटर्स जो दिखाते हैं कि ESG मार्जिन बेहतर कर सकता है।",
+          },
+          {
+            role: "ज्यूरी सर्कल",
+            name: "फाइनेंस और गवर्नेंस ज्यूरी",
+            intro: "स्केलेबल और जवाबदेह ESG मॉडलों का मूल्यांकन करने वाले विशेषज्ञ।",
+          },
+          {
+            role: "ज्यूरी सर्कल",
+            name: "सामाजिक प्रभाव समीक्षक",
+            intro: "समावेशन, रोजगार और लचीलापन का आकलन करने वाले नेता।",
+          },
+        ];
+        return { ...voice, ...map[index] };
+      })
+    : featuredVoices;
   return (
     <section className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#f6fbf8_0%,#ffffff_100%)] px-6 py-24">
       <div className="esg-section-band" />
@@ -37,19 +65,22 @@ export default function SpeakerJuryShowcase() {
       <div className="esg-shell">
         <div className="mb-14 max-w-3xl">
           <div className="esg-badge bg-cyan-100/80 text-cyan-800">
-            Featured Voices
+            {isHindi ? "विशेष वक्ता" : "Featured Voices"}
           </div>
           <h2 className="mt-6 text-4xl font-semibold tracking-tight text-stone-900 md:text-5xl">
-            Speakers and juries who bring the full ESG lens.
+            {isHindi
+              ? "ऐसे स्पीकर्स और ज्यूरी जो ESG का संपूर्ण दृष्टिकोण लाते हैं।"
+              : "Speakers and juries who bring the full ESG lens."}
           </h2>
           <p className="mt-4 text-base leading-7 text-stone-600">
-            The summit experience will blend environmental transition, social inclusion, and governance rigor
-            across speaker sessions, jury-led reviews, and implementation dialogues.
+            {isHindi
+              ? "समिट में स्पीकर सत्रों, ज्यूरी समीक्षाओं और कार्यान्वयन संवादों के जरिए पर्यावरण, सामाजिक समावेशन और गवर्नेंस को जोड़ा जाएगा।"
+              : "The summit experience will blend environmental transition, social inclusion, and governance rigor across speaker sessions, jury-led reviews, and implementation dialogues."}
           </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {featuredVoices.map((voice) => (
+          {voices.map((voice) => (
             <article
               key={voice.name}
               className="esg-card-light overflow-hidden rounded-[1.75rem] transition duration-300 hover:-translate-y-1"

@@ -17,6 +17,9 @@ import SpeakerJuryShowcase from "./components/SpeakerJuryShowcase";
 
 export default function App() {
   const [pathname, setPathname] = useState(window.location.pathname);
+  const [language, setLanguage] = useState(
+    () => window.localStorage.getItem("site_language") || "en"
+  );
 
   useEffect(() => {
     if (pathname === "/admin" || pathname === "/register") {
@@ -49,6 +52,10 @@ export default function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  useEffect(() => {
+    window.localStorage.setItem("site_language", language);
+  }, [language]);
+
   const navigate = (nextPath) => {
     if (nextPath === pathname) return;
 
@@ -62,26 +69,42 @@ export default function App() {
   }
 
   if (pathname === "/register") {
-    return <RegistrationPage onBackToSite={() => navigate("/")} />;
+    return (
+      <RegistrationPage
+        language={language}
+        onLanguageChange={setLanguage}
+        onBackToSite={() => navigate("/")}
+      />
+    );
   }
 
   if (pathname === "/partners") {
-    return <PartnerPage onBackToSite={() => navigate("/")} />;
+    return (
+      <PartnerPage
+        language={language}
+        onLanguageChange={setLanguage}
+        onBackToSite={() => navigate("/")}
+      />
+    );
   }
 
   return (
     <div className="bg-black text-white overflow-x-hidden">
-      <Navbar onNavigate={navigate} />
-      <Hero onNavigate={navigate} />
-      <AboutSummit />
-      <ExportOpportunitiesSection />
-      <ChallengesOpportunities />
-      <SuccessfulModels />
-      <RegisterSection onNavigate={navigate} />
-      <PartnerSection onNavigate={navigate} />
-      <SpeakerJuryShowcase />
-      <ContactSection />
-      <ESGFooter />
+      <Navbar
+        language={language}
+        onLanguageChange={setLanguage}
+        onNavigate={navigate}
+      />
+      <Hero language={language} onNavigate={navigate} />
+      <AboutSummit language={language} />
+      <ExportOpportunitiesSection language={language} />
+      <ChallengesOpportunities language={language} />
+      <SuccessfulModels language={language} />
+      <RegisterSection language={language} onNavigate={navigate} />
+      <PartnerSection language={language} onNavigate={navigate} />
+      <SpeakerJuryShowcase language={language} />
+      <ContactSection language={language} />
+      <ESGFooter language={language} />
     </div>
   );
 }

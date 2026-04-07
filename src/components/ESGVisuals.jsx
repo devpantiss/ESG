@@ -4,27 +4,34 @@ export function NatureRibbon() {
   return null;
 }
 
-export function ESGPriorityCards() {
+export function ESGPriorityCards({ language = "en" }) {
+  const isHindi = language === "hi";
   const cards = [
     {
-      title: "Environmental",
-      text: "Promote cleaner production, resource efficiency, and climate-ready industrial growth across sectors.",
+      title: isHindi ? "पर्यावरण" : "Environmental",
+      text: isHindi
+        ? "स्वच्छ उत्पादन, संसाधन दक्षता और जलवायु-सक्षम औद्योगिक विकास को बढ़ावा दें।"
+        : "Promote cleaner production, resource efficiency, and climate-ready industrial growth across sectors.",
       icon: Leaf,
       shell: "bg-[#d9f3e8] text-emerald-900",
       line: "text-emerald-600",
       illustration: "environment",
     },
     {
-      title: "Social",
-      text: "Expand inclusion, workforce readiness, and equitable value creation across supply chains and communities.",
+      title: isHindi ? "सामाजिक" : "Social",
+      text: isHindi
+        ? "सप्लाई-चेन और समुदायों में समावेशन, कार्यबल तैयारी और समान मूल्य निर्माण बढ़ाएं।"
+        : "Expand inclusion, workforce readiness, and equitable value creation across supply chains and communities.",
       icon: UsersRound,
       shell: "bg-[#d9eefc] text-cyan-950",
       line: "text-cyan-600",
       illustration: "social",
     },
     {
-      title: "Governance",
-      text: "Strengthen reporting, accountability, and institutional trust for long-term business competitiveness.",
+      title: isHindi ? "गवर्नेंस" : "Governance",
+      text: isHindi
+        ? "दीर्घकालिक प्रतिस्पर्धा के लिए रिपोर्टिंग, जवाबदेही और संस्थागत भरोसा मजबूत करें।"
+        : "Strengthen reporting, accountability, and institutional trust for long-term business competitiveness.",
       icon: Scale,
       shell: "bg-[#eadff8] text-violet-950",
       line: "text-violet-600",
@@ -37,7 +44,7 @@ export function ESGPriorityCards() {
       <div className="mb-8 flex items-center justify-center gap-4">
         <div className="h-px w-10 bg-stone-300" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-stone-500">
-          Understanding ESG
+          {isHindi ? "ESG को समझें" : "Understanding ESG"}
         </p>
         <div className="h-px w-10 bg-stone-300" />
       </div>

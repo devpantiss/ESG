@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
-export default function Navbar({ onNavigate }) {
+export default function Navbar({ language = "en", onLanguageChange, onNavigate }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isHindi = language === "hi";
+  const labels = {
+    home: isHindi ? "होम" : "Home",
+    about: isHindi ? "समिट परिचय" : "About",
+    export: isHindi ? "निर्यात" : "Export",
+    opportunity: isHindi ? "अवसर" : "Opportunity",
+    objectives: isHindi ? "उद्देश्य" : "Objectives",
+    partner: isHindi ? "पार्टनर" : "Partner",
+    contact: isHindi ? "संपर्क" : "Contact",
+    registerNow: isHindi ? "अभी पंजीकरण करें" : "Register Now",
+    admin: "Admin",
+  };
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -47,7 +59,7 @@ export default function Navbar({ onNavigate }) {
         {/* Logo */}
         <div className="text-lg font-semibold">
           <span className={scrolled ? "text-green-800" : "text-white"}>
-            India ESG Summit
+            {isHindi ? "इंडिया ESG समिट" : "India ESG Summit"}
           </span>
           <span className="ml-2 text-yellow-500">2026</span>
         </div>
@@ -61,45 +73,57 @@ export default function Navbar({ onNavigate }) {
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("home")}
           >
-            Home
+            {labels.home}
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("about")}
           >
-            About
+            {labels.about}
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("export")}
           >
-            Export
+            {labels.export}
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("challenges")}
           >
-            Opportunity
+            {labels.opportunity}
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("objectives")}
           >
-            Objectives
+            {labels.objectives}
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("partner")}
           >
-            Partner
+            {labels.partner}
           </li>
           <li
             className="cursor-pointer hover:text-yellow-500 transition"
             onClick={() => scrollToSection("contact")}
           >
-            Contact
+            {labels.contact}
           </li>
         </ul>
+
+        <button
+          type="button"
+          onClick={() => onLanguageChange?.(isHindi ? "en" : "hi")}
+          className={`hidden md:block rounded-md border px-3 py-2 text-xs font-semibold tracking-wide transition ${
+            scrolled
+              ? "border-green-800 text-green-900 hover:bg-green-50"
+              : "border-white/50 text-white hover:bg-white/10"
+          }`}
+        >
+          {isHindi ? "EN" : "हिंदी"}
+        </button>
 
         {/* Desktop Button */}
         <button
@@ -107,7 +131,7 @@ export default function Navbar({ onNavigate }) {
           onClick={() => navigateTo("/register")}
           className="hidden md:block px-5 py-2 rounded-md text-sm font-medium bg-green-700 text-white hover:bg-green-800 transition"
         >
-          Register Now
+          {labels.registerNow}
         </button>
 
         <button
@@ -119,7 +143,7 @@ export default function Navbar({ onNavigate }) {
               : "border-white/50 text-white hover:bg-white/10"
           }`}
         >
-          Admin
+          {labels.admin}
         </button>
 
         {/* Hamburger */}
@@ -144,7 +168,7 @@ export default function Navbar({ onNavigate }) {
               setMobileOpen(false);
             }}
           >
-            Home
+            {labels.home}
           </p>
           <p
             className="cursor-pointer"
@@ -153,7 +177,7 @@ export default function Navbar({ onNavigate }) {
               setMobileOpen(false);
             }}
           >
-            About
+            {labels.about}
           </p>
           <p
             className="cursor-pointer"
@@ -162,7 +186,7 @@ export default function Navbar({ onNavigate }) {
               setMobileOpen(false);
             }}
           >
-            Export
+            {labels.export}
           </p>
           <p
             className="cursor-pointer"
@@ -171,7 +195,7 @@ export default function Navbar({ onNavigate }) {
               setMobileOpen(false);
             }}
           >
-            Opportunity
+            {labels.opportunity}
           </p>
           <p
             className="cursor-pointer"
@@ -180,7 +204,7 @@ export default function Navbar({ onNavigate }) {
               setMobileOpen(false);
             }}
           >
-            Objectives
+            {labels.objectives}
           </p>
           <p
             className="cursor-pointer"
@@ -189,7 +213,7 @@ export default function Navbar({ onNavigate }) {
               setMobileOpen(false);
             }}
           >
-            Partner
+            {labels.partner}
           </p>
           <p
             className="cursor-pointer"
@@ -198,8 +222,16 @@ export default function Navbar({ onNavigate }) {
               setMobileOpen(false);
             }}
           >
-            Contact
+            {labels.contact}
           </p>
+
+          <button
+            type="button"
+            onClick={() => onLanguageChange?.(isHindi ? "en" : "hi")}
+            className="block w-full rounded-md border border-green-700 py-3 text-center text-green-800"
+          >
+            {isHindi ? "Switch to English" : "हिंदी में बदलें"}
+          </button>
 
           <button
             type="button"
@@ -209,7 +241,7 @@ export default function Navbar({ onNavigate }) {
             }}
             className="block w-full text-center bg-green-700 text-white py-3 rounded-md mt-3"
           >
-            Register Now
+            {labels.registerNow}
           </button>
 
           <button

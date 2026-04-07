@@ -1,6 +1,7 @@
 import { NatureRibbon } from "./ESGVisuals";
 
-export default function RegisterSection({ onNavigate }) {
+export default function RegisterSection({ language = "en", onNavigate }) {
+  const isHindi = language === "hi";
   return (
     <section id="register" className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#ffffff_0%,#f3faf6_100%)] px-6 py-24">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.14),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.18),transparent_26%)]" />
@@ -9,58 +10,66 @@ export default function RegisterSection({ onNavigate }) {
 
       <div className="esg-shell">
         <div className="mb-16 text-center">
-          <div className="esg-badge bg-emerald-100/80 text-emerald-800">Registration</div>
+          <div className="esg-badge bg-emerald-100/80 text-emerald-800">
+            {isHindi ? "पंजीकरण" : "Registration"}
+          </div>
           <h2 className="mt-6 text-4xl font-semibold tracking-tight text-stone-900 md:text-5xl">
-            Register as <span className="text-emerald-700">Industry Participant</span>
+            {isHindi ? "इंडस्ट्री प्रतिभागी के रूप में " : "Register as "}
+            <span className="text-emerald-700">
+              {isHindi ? "पंजीकरण करें" : "Industry Participant"}
+            </span>
           </h2>
 
           <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-stone-600">
-            Built for corporates, MSMEs, startups, exporters, ESG professionals, investors, and institutions.
+            {isHindi
+              ? "कॉरपोरेट्स, MSMEs, स्टार्टअप्स, एक्सपोर्टर्स, ESG प्रोफेशनल्स, निवेशकों और संस्थानों के लिए बनाया गया।"
+              : "Built for corporates, MSMEs, startups, exporters, ESG professionals, investors, and institutions."}
           </p>
         </div>
 
         <div className="mb-16 grid gap-6 md:grid-cols-3">
           <RegisterCard
             icon="🏢"
-            title="Corporate"
+            title={isHindi ? "कॉरपोरेट" : "Corporate"}
             price="₹10,000"
-            desc="Leadership access, networking, and summit floor participation."
+            desc={isHindi ? "लीडरशिप एक्सेस, नेटवर्किंग और समिट भागीदारी।" : "Leadership access, networking, and summit floor participation."}
           />
 
           <RegisterCard
             icon="🚀"
-            title="MSME + Startup"
+            title={isHindi ? "MSME + स्टार्टअप" : "MSME + Startup"}
             price="₹5,000"
-            desc="Practical sessions, finance access, and growth-focused networking."
-            subline="Subsidised Price For UP MSME's ₹1,000"
+            desc={isHindi ? "व्यावहारिक सत्र, वित्त तक पहुंच और ग्रोथ नेटवर्किंग।" : "Practical sessions, finance access, and growth-focused networking."}
+            subline={isHindi ? "यूपी MSMEs के लिए सब्सिडी मूल्य ₹1,000" : "Subsidised Price For UP MSME's ₹1,000"}
             featured
           />
 
           <RegisterCard
             icon="🤝"
-            title="Institutional Delegate"
+            title={isHindi ? "संस्थागत प्रतिनिधि" : "Institutional Delegate"}
             price="₹7,500"
-            desc="For consultants, investors, banks, ecosystem enablers, and sector experts."
+            desc={isHindi ? "कंसल्टेंट्स, निवेशकों, बैंकों और सेक्टर विशेषज्ञों के लिए।" : "For consultants, investors, banks, ecosystem enablers, and sector experts."}
           />
         </div>
 
         <div className="esg-card-light mx-auto max-w-4xl rounded-[2rem] p-10 text-center">
           <h3 className="text-2xl font-semibold text-stone-900">
-            Registration includes
+            {isHindi ? "पंजीकरण में शामिल" : "Registration includes"}
           </h3>
 
           <div className="mt-8 grid gap-4 text-left text-stone-600 md:grid-cols-2">
-            <Benefit>Access to all summit sessions</Benefit>
-            <Benefit>Networking and matchmaking opportunities</Benefit>
-            <Benefit>ESG handbook and delegate kit</Benefit>
-            <Benefit>Certificate of participation</Benefit>
+            <Benefit>{isHindi ? "सभी समिट सत्रों तक पहुंच" : "Access to all summit sessions"}</Benefit>
+            <Benefit>{isHindi ? "नेटवर्किंग और मैचमेकिंग अवसर" : "Networking and matchmaking opportunities"}</Benefit>
+            <Benefit>{isHindi ? "ESG हैंडबुक और डेलीगेट किट" : "ESG handbook and delegate kit"}</Benefit>
+            <Benefit>{isHindi ? "भागीदारी प्रमाणपत्र" : "Certificate of participation"}</Benefit>
           </div>
 
           <div className="esg-divider mt-8" />
 
           <p className="mx-auto mt-8 max-w-2xl text-sm leading-7 text-stone-600">
-            Registration runs on the app’s dedicated step flow and stores submissions directly in the working system,
-            not an external form.
+            {isHindi
+              ? "पंजीकरण ऐप के स्टेप-बेस्ड फ्लो पर होता है और सबमिशन सीधे सिस्टम में सहेजे जाते हैं।"
+              : "Registration runs on the app’s dedicated step flow and stores submissions directly in the working system, not an external form."}
           </p>
 
           <button
@@ -68,7 +77,7 @@ export default function RegisterSection({ onNavigate }) {
             onClick={() => onNavigate?.("/register")}
             className="mt-8 rounded-xl bg-emerald-700 px-6 py-3 font-medium text-white transition hover:bg-emerald-800"
           >
-            Start Registration
+            {isHindi ? "पंजीकरण शुरू करें" : "Start Registration"}
           </button>
         </div>
       </div>

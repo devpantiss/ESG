@@ -73,11 +73,10 @@ const EXPORT_FIELDS = [
   { key: "phone", label: "Phone", getValue: (r) => r.phone },
   { key: "city", label: "City", getValue: (r) => r.city },
   { key: "submitted", label: "Submitted", getValue: (r) => new Date(r.created_at).toLocaleString() },
-  { key: "gender", label: "Gender", getValue: (r) => r.questionnaire?.gender },
   { key: "sector", label: "Sector", getValue: (r) => r.questionnaire?.sector },
-  { key: "experience", label: "Experience", getValue: (r) => r.questionnaire?.experience ?? "" },
+  { key: "state", label: "State", getValue: (r) => r.questionnaire?.state ?? "" },
   { key: "export_experience", label: "Export Experience", getValue: (r) => r.questionnaire?.exportExperience },
-  { key: "interests", label: "Interests", getValue: (r) => Array.isArray(r.questionnaire?.interests) ? r.questionnaire.interests.join("; ") : "" },
+  { key: "area_of_interest", label: "Area of Interest", getValue: (r) => r.questionnaire?.areaOfInterest ?? "" },
   { key: "participants", label: "Participants", getValue: (r) => r.questionnaire?.participantsCount },
   { key: "exhibition", label: "Exhibition", getValue: (r) => r.questionnaire?.exhibitionInterest },
   { key: "accessibility", label: "Accessibility", getValue: (r) => r.questionnaire?.accessibilitySupport },
@@ -210,6 +209,12 @@ export default function AdminDashboard({ onBackToSite }) {
   const [activeActionId, setActiveActionId] = useState("");
   const [proofErrorPaths, setProofErrorPaths] = useState({});
   const [exportDialog, setExportDialog] = useState({ open: false, mode: "filtered" });
+  const [invoiceAmountDialog, setInvoiceAmountDialog] = useState({
+    open: false,
+    registrationId: "",
+    participantName: "",
+    amount: 5000,
+  });
   const [selectedExportFields, setSelectedExportFields] = useState(() => EXPORT_FIELDS.map((field) => field.key));
 
   const searchRef = useRef(null);
@@ -407,13 +412,33 @@ export default function AdminDashboard({ onBackToSite }) {
     setActiveActionId("");
   }, [fetchRegistrations]);
 
-  const handleSendInvoice = useCallback(async (registrationId) => {
+  const handleSendInvoice = useCallback(async (registrationId, amountInInr) => {
     if (!supabase) return;
+    const safeAmount = Number(amountInInr);
+    if (!Number.isFinite(safeAmount) || safeAmount <= 0) {
+      setErrorMessage("Please enter a valid invoice amount.");
+      return;
+    }
+
     setActiveActionId(`invoice:${registrationId}`);
     setErrorMessage("");
 
+    const { error: amountUpdateError } = await supabase
+      .from("registrations")
+      .update({
+        payment_amount: Math.round(safeAmount * 100),
+        payment_currency: "INR",
+      })
+      .eq("id", registrationId);
+
+    if (amountUpdateError) {
+      setErrorMessage(amountUpdateError.message);
+      setActiveActionId("");
+      return;
+    }
+
     const { error } = await supabase.functions.invoke("send-registration-invoice", {
-      body: { registrationId },
+      body: { registrationId, amount: Math.round(safeAmount * 100), currency: "INR" },
     });
 
     if (error) {
@@ -424,6 +449,29 @@ export default function AdminDashboard({ onBackToSite }) {
 
     setActiveActionId("");
   }, [fetchRegistrations]);
+
+  const openInvoiceAmountPrompt = useCallback((registration) => {
+    const existingAmount = registration?.payment_amount
+      ? registration.payment_amount / 100
+      : registration?.participant_type === "MSME"
+        ? 1000
+        : 5000;
+    setInvoiceAmountDialog({
+      open: true,
+      registrationId: registration.id,
+      participantName: registration.full_name || "Participant",
+      amount: existingAmount,
+    });
+  }, []);
+
+  const closeInvoiceAmountPrompt = useCallback(() => {
+    setInvoiceAmountDialog((current) => ({ ...current, open: false }));
+  }, []);
+
+  const confirmSendInvoice = useCallback(async () => {
+    await handleSendInvoice(invoiceAmountDialog.registrationId, invoiceAmountDialog.amount);
+    setInvoiceAmountDialog((current) => ({ ...current, open: false }));
+  }, [handleSendInvoice, invoiceAmountDialog.amount, invoiceAmountDialog.registrationId]);
 
   const openInvoicePreview = useCallback((registration) => {
     if (!registration?.invoice_number && !registration?.invoice_sent_at) return;
@@ -893,7 +941,7 @@ export default function AdminDashboard({ onBackToSite }) {
                                 getProofUrl={getProofUrl}
                                 proofError={proofErrorPaths[normalizeProofPath(reg.questionnaire?.paymentProofPath)] || ""}
                                 onVerifyPayment={() => handleVerifyPayment(reg.id)}
-                                onSendInvoice={() => handleSendInvoice(reg.id)}
+                                onSendInvoice={() => openInvoiceAmountPrompt(reg)}
                                 onViewInvoice={() => openInvoicePreview(reg)}
                                 onExpand={() => setExpandedRow(isExpanded ? null : reg.id)}
                                 onSelect={() => toggleSelect(reg.id)}
@@ -1048,6 +1096,66 @@ export default function AdminDashboard({ onBackToSite }) {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {invoiceAmountDialog.open && (
+        <div className="admin-modal-backdrop" role="presentation" onClick={closeInvoiceAmountPrompt}>
+          <div
+            className="admin-export-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="invoice-amount-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="admin-export-modal__header">
+              <div>
+                <p className="admin-table-section__eyebrow">Invoice Amount</p>
+                <h2 id="invoice-amount-title" className="admin-export-modal__title">
+                  Set invoice amount
+                </h2>
+                <p className="admin-export-modal__subtitle">
+                  {invoiceAmountDialog.participantName} - enter the amount to bill (e.g. 1000 or 5000).
+                </p>
+              </div>
+              <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={closeInvoiceAmountPrompt}>
+                Close
+              </button>
+            </div>
+
+            <div className="px-5 pb-5">
+              <label className="admin-field">
+                <span className="admin-field__label">Amount (INR)</span>
+                <input
+                  className="admin-field__input"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={invoiceAmountDialog.amount}
+                  onChange={(event) =>
+                    setInvoiceAmountDialog((current) => ({
+                      ...current,
+                      amount: Number(event.target.value || 0),
+                    }))
+                  }
+                />
+              </label>
+            </div>
+
+            <div className="admin-export-modal__footer">
+              <span className="admin-toolbar__count">
+                This amount will be saved before sending the invoice.
+              </span>
+              <button
+                type="button"
+                className="admin-btn admin-btn--primary"
+                onClick={confirmSendInvoice}
+                disabled={activeActionId === `invoice:${invoiceAmountDialog.registrationId}` || invoiceAmountDialog.amount <= 0}
+              >
+                {activeActionId === `invoice:${invoiceAmountDialog.registrationId}` ? "Sending..." : "Send Invoice"}
+              </button>
             </div>
           </div>
         </div>
@@ -1236,11 +1344,11 @@ function TableRow({
                 <DetailItem label="Email" value={reg.email} />
                 <DetailItem label="Phone" value={reg.phone} />
                 <DetailItem label="City" value={reg.city} />
+                <DetailItem label="State" value={q.state} />
                 <DetailItem label="Submitted" value={new Date(reg.created_at).toLocaleString()} />
-                <DetailItem label="Gender" value={q.gender} />
                 <DetailItem label="Sector" value={q.sector} />
-                <DetailItem label="Experience" value={q.experience != null ? `${q.experience} years` : null} />
                 <DetailItem label="Export Experience" value={q.exportExperience} />
+                <DetailItem label="Area of Interest" value={q.areaOfInterest} />
                 <DetailItem label="Participants" value={q.participantsCount} />
                 <DetailItem label="Exhibition Interest" value={q.exhibitionInterest} />
                 <DetailItem label="Accessibility Support" value={q.accessibilitySupport} />
@@ -1250,7 +1358,6 @@ function TableRow({
                 <DetailItem label="Invoice Number" value={reg.invoice_number} />
                 <DetailItem label="Invoice Sent At" value={reg.invoice_sent_at ? new Date(reg.invoice_sent_at).toLocaleString() : null} />
                 <DetailItem label="Paid At" value={reg.payment_completed_at ? new Date(reg.payment_completed_at).toLocaleString() : null} />
-                <DetailItem label="Interests" value={Array.isArray(q.interests) ? q.interests.join(", ") : null} span />
                 <DetailItem label="Proof Path" value={q.paymentProofPath} span />
               </div>
 

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 const TARGET_DATE = new Date("April 10, 2026 09:00:00").getTime();
 
-export default function ESGHero({ onNavigate }) {
+export default function ESGHero({ language = "en", onNavigate }) {
+  const isHindi = language === "hi";
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const sectionRef = useRef(null);
   const videoLayerRef = useRef(null);
@@ -65,7 +66,7 @@ export default function ESGHero({ onNavigate }) {
           >
             <video
               className="h-full w-1/3 object-cover"
-              src="/e.mp4"
+              src="/ESG_Video/Environment.mp4"
               autoPlay
               loop
               muted
@@ -73,7 +74,7 @@ export default function ESGHero({ onNavigate }) {
             />
             <video
               className="h-full w-1/3 object-cover"
-              src="/s.mp4"
+              src="/ESG_Video/Social.mp4"
               autoPlay
               loop
               muted
@@ -81,7 +82,7 @@ export default function ESGHero({ onNavigate }) {
             />
             <video
               className="h-full w-1/3 object-cover"
-              src="/g.mp4"
+              src="/ESG_Video/Governance.mp4"
               autoPlay
               loop
               muted
@@ -89,14 +90,16 @@ export default function ESGHero({ onNavigate }) {
             />
           </div>
           <div className="absolute inset-0 bg-black/35" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/80" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/35 via-transparent to-black/80" />
         </div>
       </div>
 
       <div className="relative mx-auto max-w-6xl">
         <div className="max-w-3xl">
           <p className="mb-5 text-sm font-semibold uppercase tracking-[0.32em] text-amber-300">
-            10 April 2026 · Lucknow, Uttar Pradesh
+            {isHindi
+              ? "10 अप्रैल 2026 · लखनऊ, उत्तर प्रदेश"
+              : "10 April 2026 · Lucknow, Uttar Pradesh"}
           </p>
 
           <h1 className="max-w-3xl text-5xl font-semibold leading-[0.95] tracking-tight text-white md:text-7xl">
@@ -104,12 +107,13 @@ export default function ESGHero({ onNavigate }) {
           </h1>
 
           <p className="mt-4 text-lg font-medium text-emerald-200">
-            भारत ESG सम्मेलन 2026
+            {isHindi ? "भारत ESG सम्मेलन 2026" : "India ESG Summit in Hindi"}
           </p>
 
           <p className="mt-8 max-w-2xl text-lg leading-8 text-stone-200">
-            A summit focused on MSME competitiveness, export readiness, sustainable finance, and accountable
-            governance, built around the full environment, social, and governance agenda.
+            {isHindi
+              ? "यह समिट MSME प्रतिस्पर्धा, निर्यात तैयारी, सतत वित्त और जवाबदेह गवर्नेंस पर केंद्रित है।"
+              : "A summit focused on MSME competitiveness, export readiness, sustainable finance, and accountable governance, built around the full environment, social, and governance agenda."}
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4">
@@ -118,7 +122,7 @@ export default function ESGHero({ onNavigate }) {
               onClick={() => onNavigate?.("/register")}
               className="rounded-xl bg-amber-400 px-7 py-3.5 font-semibold text-stone-950 transition hover:bg-amber-300"
             >
-              Register as Industry Participant
+              {isHindi ? "इंडस्ट्री प्रतिभागी के रूप में पंजीकरण करें" : "Register as Industry Participant"}
             </button>
 
             <button
@@ -126,7 +130,7 @@ export default function ESGHero({ onNavigate }) {
               onClick={() => onNavigate?.("/partners")}
               className="rounded-xl border border-white/25 px-7 py-3.5 font-semibold text-white transition hover:border-amber-300 hover:bg-white/5"
             >
-              Partner with the Summit
+              {isHindi ? "समिट के साथ पार्टनर बनें" : "Partner with the Summit"}
             </button>
           </div>
         </div>
@@ -136,15 +140,17 @@ export default function ESGHero({ onNavigate }) {
             <div className="min-w-[180px]">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">Countdown</p>
               <p className="mt-1 text-sm leading-6 text-stone-300">
-                Event clock, kept secondary to the main narrative.
+                {isHindi
+                  ? "कार्यक्रम काउंटडाउन, मुख्य जानकारी के साथ।"
+                  : "Event clock, kept secondary to the main narrative."}
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <TimeBox value={timeLeft.days} label="Days" />
-              <TimeBox value={timeLeft.hours} label="Hours" />
-              <TimeBox value={timeLeft.minutes} label="Minutes" />
-              <TimeBox value={timeLeft.seconds} label="Seconds" />
+              <TimeBox value={timeLeft.days} label={isHindi ? "दिन" : "Days"} />
+              <TimeBox value={timeLeft.hours} label={isHindi ? "घंटे" : "Hours"} />
+              <TimeBox value={timeLeft.minutes} label={isHindi ? "मिनट" : "Minutes"} />
+              <TimeBox value={timeLeft.seconds} label={isHindi ? "सेकंड" : "Seconds"} />
             </div>
           </div>
         </div>

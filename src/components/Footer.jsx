@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
-export default function ESGFooter() {
+export default function ESGFooter({ language = "en" }) {
+  const isHindi = language === "hi";
   const footerRef = useRef();
 
   useEffect(() => {
@@ -18,17 +19,20 @@ export default function ESGFooter() {
       className="bg-[#2f6b4f] text-white text-center py-10 px-6"
     >
       <h2 className="text-xl font-semibold mb-3">
-        India ESG Summit 2026
+        {isHindi ? "इंडिया ESG समिट 2026" : "India ESG Summit 2026"}
       </h2>
 
       <p className="text-sm opacity-90 max-w-2xl mx-auto">
-        Organised by <span className="font-medium">India ESG Alliance</span> &{" "}
-        <span className="font-medium">AFC India Ltd</span> · In collaboration with
-        Government of Uttar Pradesh
+        {isHindi ? "आयोजन: " : "Organised by "}
+        <span className="font-medium">India ESG Alliance</span> &{" "}
+        <span className="font-medium">AFC India Ltd</span>{" "}
+        {isHindi ? "· उत्तर प्रदेश सरकार के सहयोग से" : "· In collaboration with Government of Uttar Pradesh"}
       </p>
 
       <p className="text-xs opacity-60 mt-4">
-        © 2026 India ESG Alliance. All rights reserved.
+        {isHindi
+          ? "© 2026 India ESG Alliance. सर्वाधिकार सुरक्षित।"
+          : "© 2026 India ESG Alliance. All rights reserved."}
       </p>
     </footer>
   );

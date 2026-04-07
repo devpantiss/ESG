@@ -26,8 +26,36 @@ const successStories = [
   },
 ];
 
-export default function SuccessfulModels() {
+export default function SuccessfulModels({ language = "en" }) {
   const [openStory, setOpenStory] = useState(0);
+  const isHindi = language === "hi";
+  const localizedObjectives = isHindi
+    ? [
+        "MSME, एक्सपोर्टर्स और उद्योग नेताओं को व्यावहारिक ESG रोडमैप देना।",
+        "नीति, वित्त और इम्प्लीमेंटेशन हितधारकों को एक मंच पर जोड़ना।",
+        "मजबूत पर्यावरण, सामाजिक और गवर्नेंस प्रक्रियाओं से निर्यात तैयारी सक्षम करना।",
+        "यूपी की ESG-सक्षम औद्योगिक वृद्धि को प्रदर्शित करना।",
+      ]
+    : objectives;
+  const localizedStories = isHindi
+    ? [
+        {
+          title: "लेदर क्लस्टर अपशिष्ट जल में कमी",
+          subtitle: "कानपुर MSME कंसोर्टियम",
+          text: "साझा उपचार अपग्रेड और प्रक्रिया अनुशासन से छोटे यूनिट्स ने लागत घटाई और खरीदार भरोसा बढ़ाया।",
+        },
+        {
+          title: "ऊर्जा-दक्ष लूम आधुनिकीकरण",
+          subtitle: "टेक्सटाइल MSME क्लस्टर",
+          text: "पुराने उपकरण बदलने से ऊर्जा तीव्रता घटी, मार्जिन बेहतर हुए और संस्थागत खरीदार पहुंच मजबूत हुई।",
+        },
+        {
+          title: "परिवार-नेतृत्व विनिर्माण में औपचारिक गवर्नेंस",
+          subtitle: "इंजीनियरिंग MSME केस",
+          text: "बोर्ड अनुशासन, रिपोर्टिंग नियंत्रण और वेंडर ऑडिट से व्यवसाय अधिक बैंक योग्य बना।",
+        },
+      ]
+    : successStories;
 
   return (
     <section id="objectives" className="esg-section esg-pattern-dark bg-[linear-gradient(180deg,#0c0a09_0%,#111827_100%)] px-6 py-24 text-white">
@@ -37,18 +65,22 @@ export default function SuccessfulModels() {
       <div className="esg-shell">
         <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr]">
           <div>
-            <div className="esg-badge bg-amber-400/10 text-amber-300">Summit Objectives</div>
+            <div className="esg-badge bg-amber-400/10 text-amber-300">
+              {isHindi ? "समिट उद्देश्य" : "Summit Objectives"}
+            </div>
             <h2 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
-              What the summit is designed to deliver.
+              {isHindi
+                ? "समिट किन परिणामों को देने के लिए तैयार है।"
+                : "What the summit is designed to deliver."}
             </h2>
             <div className="mt-8 space-y-4">
-              {objectives.map((objective, index) => (
+              {localizedObjectives.map((objective, index) => (
                 <div
                   key={objective}
                   className="esg-card-dark rounded-[1.5rem] px-6 py-5 transition duration-300 hover:-translate-y-1"
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
-                    Objective {String(index + 1).padStart(2, "0")}
+                    {(isHindi ? "उद्देश्य" : "Objective")} {String(index + 1).padStart(2, "0")}
                   </p>
                   <p className="mt-3 text-sm leading-7 text-stone-200">{objective}</p>
                 </div>
@@ -57,17 +89,22 @@ export default function SuccessfulModels() {
           </div>
 
           <div>
-            <div className="esg-badge bg-cyan-400/10 text-cyan-300">Successful Stories</div>
+            <div className="esg-badge bg-cyan-400/10 text-cyan-300">
+              {isHindi ? "सफल कहानियां" : "Successful Stories"}
+            </div>
             <h3 className="mt-6 text-3xl font-semibold tracking-tight text-white">
-              MSME ESG stories and the benefits they unlocked.
+              {isHindi
+                ? "MSME ESG कहानियां और उनके प्राप्त लाभ।"
+                : "MSME ESG stories and the benefits they unlocked."}
             </h3>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-400">
-              Replacing large corporate case studies, this section focuses on practical MSME outcomes:
-              cost savings, export confidence, buyer credibility, and better access to finance.
+              {isHindi
+                ? "बड़े कॉरपोरेट केस-स्टडी की जगह यह खंड MSME के व्यावहारिक परिणामों पर केंद्रित है: लागत बचत, निर्यात भरोसा, खरीदार विश्वसनीयता और बेहतर वित्त पहुंच।"
+                : "Replacing large corporate case studies, this section focuses on practical MSME outcomes: cost savings, export confidence, buyer credibility, and better access to finance."}
             </p>
 
             <div className="mt-8 space-y-4">
-              {successStories.map((story, index) => {
+              {localizedStories.map((story, index) => {
                 const isOpen = openStory === index;
                 return (
                   <article

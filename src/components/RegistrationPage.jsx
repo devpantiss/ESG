@@ -2,8 +2,14 @@ import { useState } from "react";
 import RegistrationForm from "./RegistrationForm";
 import { getLocalizedText, registrationConfig } from "../data/registrationSchema";
 
-export default function RegistrationPage({ onBackToSite }) {
-  const [language, setLanguage] = useState(registrationConfig.defaultLang);
+export default function RegistrationPage({
+  language: externalLanguage,
+  onLanguageChange,
+  onBackToSite,
+}) {
+  const [internalLanguage, setInternalLanguage] = useState(registrationConfig.defaultLang);
+  const language = externalLanguage ?? internalLanguage;
+  const setLanguage = onLanguageChange ?? setInternalLanguage;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050807] px-6 py-10 text-white">
@@ -15,14 +21,15 @@ export default function RegistrationPage({ onBackToSite }) {
         <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-emerald-300">
-              Registration
+              {language === "hi" ? "पंजीकरण" : "Registration"}
             </p>
             <h1 className="mt-2 text-4xl font-serif font-semibold text-white">
               {getLocalizedText(registrationConfig.title, language)}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-300">
-              Complete the registration in steps. Once submitted, your response
-              will be available to administrators in the dashboard.
+              {language === "hi"
+                ? "पंजीकरण को चरणों में पूरा करें। जमा होने के बाद आपका उत्तर डैशबोर्ड में उपलब्ध होगा।"
+                : "Complete the registration in steps. Once submitted, your response will be available to administrators in the dashboard."}
             </p>
           </div>
 
@@ -49,7 +56,7 @@ export default function RegistrationPage({ onBackToSite }) {
               onClick={onBackToSite}
               className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-emerald-200 backdrop-blur-sm transition hover:border-emerald-300/30 hover:bg-white/[0.06]"
             >
-              Back to homepage
+              {language === "hi" ? "होमपेज पर वापस जाएं" : "Back to homepage"}
             </button>
           </div>
         </div>

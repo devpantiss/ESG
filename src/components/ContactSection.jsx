@@ -1,6 +1,7 @@
 import { NatureRibbon } from "./ESGVisuals";
 
-export default function ContactSection() {
+export default function ContactSection({ language = "en" }) {
+  const isHindi = language === "hi";
   return (
     <section id="contact" className="esg-section esg-pattern-light bg-[linear-gradient(180deg,#eef7f0_0%,#ffffff_100%)] px-6 py-28">
       <div className="esg-section-band" />
@@ -9,14 +10,16 @@ export default function ContactSection() {
 
       <div className="esg-shell">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="esg-badge bg-emerald-100/80 text-emerald-800">Contact Us</div>
+          <div className="esg-badge bg-emerald-100/80 text-emerald-800">
+            {isHindi ? "संपर्क करें" : "Contact Us"}
+          </div>
           <h2 className="mt-6 text-4xl font-semibold tracking-tight text-stone-900 md:text-5xl">
-            Reach the organizing secretariat
+            {isHindi ? "आयोजन सचिवालय से संपर्क करें" : "Reach the organizing secretariat"}
           </h2>
 
           <div className="esg-card-light mx-auto mt-12 max-w-xl rounded-[2rem] p-10">
             <h3 className="text-2xl font-semibold text-stone-900">
-              Organizing Secretariat
+              {isHindi ? "आयोजन सचिवालय" : "Organizing Secretariat"}
             </h3>
 
             <p className="mt-2 font-semibold text-emerald-700">
@@ -32,7 +35,7 @@ export default function ContactSection() {
               </div>
 
               <p className="text-sm text-stone-500">
-                Director, India ESG Alliance
+                {isHindi ? "निदेशक, इंडिया ESG एलायंस" : "Director, India ESG Alliance"}
               </p>
 
               <div className="flex items-center justify-center gap-2">

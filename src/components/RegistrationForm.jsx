@@ -10,16 +10,15 @@ const draftStorageKey = "esg_registration_draft";
 const initialForm = {
   representativeType: "",
   name: "",
-  gender: "",
   mobile: "",
   email: "",
   company: "",
   sector: "",
   designation: "",
-  experience: "",
-  address: "",
+  city: "",
+  state: "",
   exportExperience: "",
-  interests: [],
+  areaOfInterest: "",
   reference: "",
   participantsCount: "",
   exhibitionInterest: "",
@@ -52,6 +51,10 @@ export default function RegistrationForm({ language = "en" }) {
 
   const activeStep = registrationSteps[currentStep];
   const isLastStep = currentStep === registrationSteps.length - 1;
+  const isUpMsme =
+    formData.representativeType === "MSME" &&
+    /^(uttar pradesh|up)$/i.test(formData.state.trim());
+  const payableAmount = isUpMsme ? 1000 : 5000;
 
   useEffect(() => {
     const draft = { ...formData };
@@ -222,16 +225,16 @@ export default function RegistrationForm({ language = "en" }) {
       const questionnaire = {
         language,
         representativeType: formData.representativeType,
-        gender: formData.gender,
         sector: formData.sector.trim(),
-        experience: formData.experience ? Number(formData.experience) : null,
-        address: formData.address.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim(),
         exportExperience: formData.exportExperience,
-        interests: formData.interests,
+        areaOfInterest: formData.areaOfInterest,
         reference: formData.reference.trim(),
         participantsCount: formData.participantsCount,
         exhibitionInterest: formData.exhibitionInterest,
         accessibilitySupport: formData.accessibilitySupport,
+        payableAmount,
         paymentProofPath,
       };
 
@@ -243,12 +246,12 @@ export default function RegistrationForm({ language = "en" }) {
         organization: formData.company.trim(),
         designation: formData.designation.trim(),
         participant_type: formData.representativeType,
-        city: formData.address.trim(),
+        city: formData.city.trim(),
         attendance_mode: "Paid Registration",
         questionnaire,
         payment_status: "pending",
         payment_provider: "manual_transfer",
-        payment_amount: (paymentStep?.paymentDetails?.amount ?? 1000) * 100,
+        payment_amount: (payableAmount || paymentStep?.paymentDetails?.amount || 5000) * 100,
         payment_currency: paymentStep?.paymentDetails?.currency ?? "INR",
       };
 
@@ -339,6 +342,8 @@ export default function RegistrationForm({ language = "en" }) {
             onChange={handleChange}
             language={language}
             isSubmitting={isSubmitting}
+            payableAmount={payableAmount}
+            isUpMsme={isUpMsme}
           />
         </div>
 
@@ -405,7 +410,7 @@ export default function RegistrationForm({ language = "en" }) {
   );
 }
 
-function StepContent({ step, formData, onChange, language, isSubmitting }) {
+function StepContent({ step, formData, onChange, language, isSubmitting, payableAmount, isUpMsme }) {
   if (step.type === "info") {
     return (
       <section className="rounded-3xl border border-emerald-300/10 bg-[linear-gradient(180deg,rgba(16,185,129,0.08),rgba(6,14,11,0.72))] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
@@ -431,7 +436,7 @@ function StepContent({ step, formData, onChange, language, isSubmitting }) {
               {language === "hi" ? "भुगतान जानकारी" : "Payment Information"}
             </h3>
             <div className="mt-4 grid gap-3 text-sm text-stone-300 md:grid-cols-2">
-              <p>Amount: ₹{step.paymentDetails.amount}</p>
+              <p>Amount: ₹{payableAmount}</p>
               <p>Currency: {step.paymentDetails.currency}</p>
               <p>Account Name: {step.paymentDetails.accountName}</p>
               <p>Bank Name: {step.paymentDetails.bankName}</p>
@@ -447,6 +452,13 @@ function StepContent({ step, formData, onChange, language, isSubmitting }) {
               {getLocalizedText(step.paymentDetails.supportNote, language)}
             </p>
             <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm text-stone-300">
+              {isUpMsme ? (
+                <p className="mb-2 text-emerald-300">
+                  {language === "hi"
+                    ? "UP MSME रियायत लागू: देय शुल्क ₹1000"
+                    : "UP MSME concession applied: payable fee is ₹1000"}
+                </p>
+              ) : null}
               {language === "hi"
                 ? "भुगतान स्क्रीनशॉट अपलोड करने के बाद आपका status pending रहेगा। Admin verify करने के बाद invoice भेजी जाएगी।"
                 : "After you upload the payment screenshot, your status will remain pending until an admin verifies it and sends the invoice."}
@@ -522,6 +534,20 @@ function PaymentCheckoutCard({ language, isSubmitting }) {
 }
 
 function FieldRenderer({ field, value, onChange, language }) {
+  if (field.type === "select") {
+    return (
+      <SelectField
+        label={getLocalizedText(field.label, language)}
+        name={field.name}
+        value={value}
+        onChange={onChange}
+        required={field.required}
+        options={field.options ?? []}
+        language={language}
+      />
+    );
+  }
+
   if (field.type === "radio") {
     return (
       <ChoiceField
@@ -616,6 +642,30 @@ function Field({ label, name, type = "text", value, onChange, required = false }
         required={required}
         placeholder={label}
       />
+    </label>
+  );
+}
+
+function SelectField({ label, name, value, onChange, required = false, options = [], language }) {
+  return (
+    <label className="grid gap-2 text-left">
+      <span className="text-sm font-medium text-stone-200">{label}</span>
+      <select
+        className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-emerald-300 focus:shadow-[0_0_0_3px_rgba(52,211,153,0.12)]"
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+      >
+        <option value="">
+          {language === "hi" ? "विकल्प चुनें" : "Select an option"}
+        </option>
+        {options.map((option) => (
+          <option key={option.en} value={option.en} className="bg-stone-900 text-white">
+            {getLocalizedText(option, language)}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }

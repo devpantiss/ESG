@@ -24,8 +24,8 @@ export const registrationConfig = {
           hi: "इंडिया ESG समिट 2026, जिसे इंडिया ESG एलायंस और AFC इंडिया द्वारा उत्तर प्रदेश सरकार के सहयोग से आयोजित किया जा रहा है, का उद्देश्य उत्तर प्रदेश को एक वैश्विक विनिर्माण और निर्यात केंद्र के रूप में सशक्त बनाना है। यह समिट MSMEs को पर्यावरण, सामाजिक और शासन (ESG) मानकों को अपनाने में सक्षम बनाकर इस लक्ष्य को प्राप्त करने का प्रयास करता है। इस समिट के लिए पंजीकरण शुल्क ₹1000 निर्धारित किया गया है, जो सामान्यतः ₹5000 होता है, परंतु उत्तर प्रदेश के MSMEs को प्रोत्साहित करने हेतु इसे विशेष रूप से रियायती दर पर रखा गया है। यह आयोजन भारतीय उद्योग संघ (IIA), दलित इंडियन चैंबर ऑफ कॉमर्स एंड इंडस्ट्री (DICCI), लघु उद्योग भारती (LUB) तथा अन्य उद्योग संगठनों के समन्वय में आयोजित किया जा रहा है। जैसे-जैसे वैश्विक बाजार जिम्मेदार और टिकाऊ सप्लाई चेन की मांग बढ़ा रहे हैं, यह समिट नीति-निर्माताओं, उद्योग नेताओं, निवेशकों और विशेषज्ञों को एक मंच पर लाएगा। इसका उद्देश्य उच्च क्षमता वाले MSMEs को अंतरराष्ट्रीय बाजारों तक पहुंच बनाने के लिए आवश्यक व्यावहारिक ज्ञान, उपकरण और साझेदारियां प्रदान करना है। विशेषज्ञ सत्रों, इंडिया ESG हैंडबुक के शुभारंभ, निवेशक संवाद और रणनीतिक नेटवर्किंग के माध्यम से, यह समिट ESG को केवल अनुपालन आवश्यकता से आगे बढ़ाकर निर्यात प्रतिस्पर्धा, निवेश आकर्षण और सतत औद्योगिक विकास का एक मजबूत साधन बनाने का प्रयास करता है।",
         },
         feeInfo: {
-          en: "Registration Fee: ₹1000 (inclusive of taxes)",
-          hi: "पंजीकरण शुल्क: ₹1000 (कर सहित)",
+          en: "Registration Fee: ₹5000 (inclusive of taxes). Concessional fee for MSMEs in Uttar Pradesh: ₹1000.",
+          hi: "पंजीकरण शुल्क: ₹5000 (कर सहित)। उत्तर प्रदेश के MSMEs के लिए रियायती शुल्क: ₹1000।",
         },
       },
     },
@@ -39,7 +39,7 @@ export const registrationConfig = {
       fields: [
         {
           name: "representativeType",
-          type: "radio",
+          type: "select",
           required: true,
           label: {
             en: "Representative As",
@@ -64,20 +64,6 @@ export const registrationConfig = {
             en: "Full Name",
             hi: "नाम",
           },
-        },
-        {
-          name: "gender",
-          type: "radio",
-          required: true,
-          label: {
-            en: "Gender",
-            hi: "लिंग",
-          },
-          options: [
-            { en: "Male", hi: "पुरुष" },
-            { en: "Female", hi: "महिला" },
-            { en: "Third Gender", hi: "तृतीय लिंग" },
-          ],
         },
         {
           name: "mobile",
@@ -108,12 +94,20 @@ export const registrationConfig = {
         },
         {
           name: "sector",
-          type: "text",
+          type: "select",
           required: true,
           label: {
             en: "Sector",
             hi: "क्षेत्र (सेक्टर)",
           },
+          options: [
+            { en: "Manufacturing", hi: "विनिर्माण" },
+            { en: "Services", hi: "सेवाएं" },
+            { en: "Energy", hi: "ऊर्जा" },
+            { en: "Infrastructure", hi: "इन्फ्रास्ट्रक्चर" },
+            { en: "Agri / Food Processing", hi: "कृषि / फूड प्रोसेसिंग" },
+            { en: "Other", hi: "अन्य" },
+          ],
         },
         {
           name: "designation",
@@ -125,25 +119,26 @@ export const registrationConfig = {
           },
         },
         {
-          name: "experience",
-          type: "number",
+          name: "city",
+          type: "text",
+          required: true,
           label: {
-            en: "Years of Experience",
-            hi: "अनुभव के वर्ष",
+            en: "Office City",
+            hi: "कार्यालय का शहर",
           },
         },
         {
-          name: "address",
-          type: "textarea",
+          name: "state",
+          type: "text",
           required: true,
           label: {
-            en: "Full Office Address (City & State)",
-            hi: "कार्यालय का पूरा पता (शहर और राज्य सहित)",
+            en: "Office State",
+            hi: "कार्यालय का राज्य",
           },
         },
         {
           name: "exportExperience",
-          type: "radio",
+          type: "select",
           required: true,
           label: {
             en: "Experience in Exports",
@@ -157,22 +152,19 @@ export const registrationConfig = {
           ],
         },
         {
-          name: "interests",
-          type: "checkbox",
+          name: "areaOfInterest",
+          type: "select",
           required: true,
           label: {
-            en: "Area of Interest (Select all that apply)",
-            hi: "रुचि के क्षेत्र (सभी लागू विकल्प चुनें)",
+            en: "Area of Interest",
+            hi: "रुचि का क्षेत्र",
           },
           options: [
-            { en: "ESG Compliance & Reporting", hi: "ESG अनुपालन और रिपोर्टिंग" },
-            { en: "Sustainable Manufacturing", hi: "सतत विनिर्माण" },
-            { en: "Green Finance", hi: "हरित वित्त" },
-            { en: "Export Competitiveness", hi: "निर्यात प्रतिस्पर्धा" },
-            { en: "Supply Chain Sustainability", hi: "सप्लाई चेन स्थिरता" },
-            { en: "Net Zero & Climate Action", hi: "नेट-ज़ीरो और जलवायु कार्रवाई" },
-            { en: "CSR & Social Impact", hi: "CSR और सामाजिक प्रभाव" },
-            { en: "Governance & Risk Management", hi: "शासन और जोखिम प्रबंधन" },
+            { en: "Ficci", hi: "Ficci" },
+            { en: "Lavodya", hi: "Lavodya" },
+            { en: "IIA", hi: "IIA" },
+            { en: "Govt. Industry Department", hi: "सरकारी उद्योग विभाग" },
+            { en: "Any other", hi: "अन्य" },
           ],
         },
         {
@@ -185,7 +177,7 @@ export const registrationConfig = {
         },
         {
           name: "participantsCount",
-          type: "radio",
+          type: "select",
           required: true,
           label: {
             en: "Participants from Organization",
@@ -200,7 +192,7 @@ export const registrationConfig = {
         },
         {
           name: "exhibitionInterest",
-          type: "radio",
+          type: "select",
           required: true,
           label: {
             en: "Interested in Exhibition?",
@@ -213,7 +205,7 @@ export const registrationConfig = {
         },
         {
           name: "accessibilitySupport",
-          type: "radio",
+          type: "select",
           required: true,
           label: {
             en: "Need Accessibility Support?",
@@ -234,7 +226,7 @@ export const registrationConfig = {
         hi: "भुगतान विवरण",
       },
       paymentDetails: {
-        amount: 1000,
+        amount: 5000,
         currency: "INR",
         accountName: "KUTUMB ASPIRATION PRIVATE LIMITED",
         bankName: "ICICI Bank",
