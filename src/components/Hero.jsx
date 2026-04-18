@@ -98,7 +98,7 @@ export default function ESGHero({ language = "en", onNavigate }) {
         <div className="max-w-3xl">
           <p className="mb-5 text-sm font-semibold uppercase tracking-[0.32em] text-amber-300">
             {isHindi
-              ? "10 अप्रैल 2026 · लखनऊ, उत्तर प्रदेश"
+              ? "24 अप्रैल 2026 · लखनऊ, उत्तर प्रदेश"
               : "24 April 2026 · Lucknow, Uttar Pradesh"}
           </p>
 
