@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const TARGET_DATE = new Date("April 10, 2026 09:00:00").getTime();
+const TARGET_DATE = new Date("April 24, 2026 09:00:00").getTime();
 
 export default function ESGHero({ language = "en", onNavigate }) {
   const isHindi = language === "hi";
@@ -99,7 +99,7 @@ export default function ESGHero({ language = "en", onNavigate }) {
           <p className="mb-5 text-sm font-semibold uppercase tracking-[0.32em] text-amber-300">
             {isHindi
               ? "10 अप्रैल 2026 · लखनऊ, उत्तर प्रदेश"
-              : "10 April 2026 · Lucknow, Uttar Pradesh"}
+              : "24 April 2026 · Lucknow, Uttar Pradesh"}
           </p>
 
           <h1 className="max-w-3xl text-5xl font-semibold leading-[0.95] tracking-tight text-white md:text-7xl">
