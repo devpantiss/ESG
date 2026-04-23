@@ -98,8 +98,8 @@ export default function ESGHero({ language = "en", onNavigate }) {
         <div className="max-w-3xl">
           <p className="mb-5 text-sm font-semibold uppercase tracking-[0.32em] text-amber-300">
             {isHindi
-              ? "24 अप्रैल 2026 · लखनऊ, उत्तर प्रदेश"
-              : "24 April 2026 · Lucknow, Uttar Pradesh"}
+              ? "24 अप्रैल 2026 · प्रयागराज, उत्तर प्रदेश"
+              : "24 April 2026 · Prayagraj, Uttar Pradesh"}
           </p>
 
           <h1 className="max-w-3xl text-5xl font-semibold leading-[0.95] tracking-tight text-white md:text-7xl">
@@ -107,7 +107,7 @@ export default function ESGHero({ language = "en", onNavigate }) {
           </h1>
 
           <p className="mt-4 text-lg font-medium text-emerald-200">
-            {isHindi ? "भारत ESG सम्मेलन 2026" : "India ESG Summit in Hindi"}
+            {isHindi ? "भारत ESG सम्मेलन 2026" : "India ESG Summit 2026"}
           </p>
 
           <p className="mt-8 max-w-2xl text-lg leading-8 text-stone-200">

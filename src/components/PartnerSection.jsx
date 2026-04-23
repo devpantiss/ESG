@@ -36,10 +36,10 @@ export default function PartnerSection({ language = "en", onNavigate }) {
           shortLabel: "IIM-L",
           logoSrc: "/LOGO/IIM_Lucknow_Logo.svg",
         },
-        { label: "SSE", shortLabel: "SSE" },
+        { label: "SSE", shortLabel: "SSE", logoSrc: "/LOGO/see.jpeg" },
         {
-          label: isHindi ? "NIT लखनऊ" : "NIT Lucknow",
-          shortLabel: "NIT-L",
+          label: isHindi ? "NIT प्रयागराज" : "NIT Prayagraj",
+          shortLabel: "NIT-P",
           logoSrc: "/LOGO/Motilal_Nehru_National_Institute_of_Technology_Allahabad_logo.png",
         },
       ],
@@ -48,7 +48,7 @@ export default function PartnerSection({ language = "en", onNavigate }) {
       title: isHindi ? "उद्योग सहयोगी" : "Industry Partners",
       accent: "from-amber-400/25 to-amber-500/5 border-amber-300/25",
       logos: [
-        { label: "DICCI", shortLabel: "DICCI", logoSrc: "/LOGO/DICCI.jpeg" },
+        { label: "DICCI", shortLabel: "DICCI", logoSrc: "/LOGO/dicci.jpg" },
         {
           label: isHindi ? "इंडियन इंडस्ट्री एसोसिएशन" : "Indian Industry Association",
           shortLabel: "IIA",
